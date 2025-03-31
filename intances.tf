@@ -13,15 +13,16 @@ resource "aws_instance" "wordpress" {
 
 #subnet para DB
 resource "aws_db_subnet_group" "rds_subnet_group" {
-    name = "grupoSubnetRDS"
-    subnet_ids = [aws_subnet.privada1.id, aws.privada2.id]
+    name = "grupo_subnet_rds"
+    subnet_ids = [aws_subnet.privada1.id, aws_subnet.privada2.id]
 }
 
 #Intancia DB (RDS)
 resource "aws_db_instance" "intanciaBD" {
     engine  = "mysql"
     engine_version  = "5.7"
-    skip_final_snapshot     = "snapshotFinal"
+    skip_final_snapshot     = true
+    final_snapshot_identifier = "snapshot_final"
     instance_class          = "db.t2.micro"
     allocated_storage       = 20
     identifier              = "intancia_db"
@@ -38,7 +39,7 @@ resource "aws_db_instance" "intanciaBD" {
 resource "aws_security_group" "grupoSeguridadDB" {
     name        = "GrupoSeguridadDB"
     description = "Grupo de seguridad para la instancia DB"
-    vpc_id      = aws_vpc.this.id
+    vpc_id      = aws_vpc.esta.id
     ingress {
         from_port   = 3306
         to_port     = 3306
