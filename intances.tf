@@ -22,10 +22,10 @@ resource "aws_db_instance" "intanciaBD" {
     engine  = "mysql"
     engine_version  = "5.7"
     skip_final_snapshot     = true
-    final_snapshot_identifier = "snapshot_final"
+    final_snapshot_identifier = "my-final-snapshot"
     instance_class          = "db.t2.micro"
     allocated_storage       = 20
-    identifier              = "intancia_db"
+    identifier              = "my-rds-instance"
     db_name                 = "wordpress_db"
     username                = "ansibleops"
     password                = "ansibleops123$"
@@ -37,14 +37,14 @@ resource "aws_db_instance" "intanciaBD" {
 }
 # Grupo de seguridad
 resource "aws_security_group" "grupoSeguridadDB" {
-    name        = "GrupoSeguridadDB"
+    name        = "grupo_seguridad_db"
     description = "Grupo de seguridad para la instancia DB"
     vpc_id      = aws_vpc.esta.id
     ingress {
         from_port   = 3306
         to_port     = 3306
         protocol    = "tcp"
-        cidr_blocks = ["10.100.0.0/16"]
+        cidr_blocks = ["10.2.0.0/16"]
     }
 
     tags = {
