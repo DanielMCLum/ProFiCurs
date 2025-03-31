@@ -14,7 +14,7 @@ resource "aws_route_table_association" "privada1" {
     route_table_id = aws_route_table.privada.id
 }
 
-resource "aws_route_table_association" "publica2" {
+resource "aws_route_table_association" "private2" {
     subnet_id   = aws_subnet.privada2.id
     route_table_id = aws_route_table.privada.id
 }
@@ -29,7 +29,7 @@ resource "aws_security_group" "ssh" {
         from_port = 22
         to_port = 22
         protocol = "tcp"
-        cidr_block = ["0.0.0.0/0"]
+        cidr_blocks = ["0.0.0.0/0"]
     }
     ingress {
         description = "Allow HTTP"
@@ -45,7 +45,7 @@ resource "aws_security_group" "ssh" {
         cidr_blocks      = ["0.0.0.0/0"]
         ipv6_cidr_blocks = ["::/0"]
     }
-    tags {
+    tags = {
         Name = "PermisosSSH"
     }
 }

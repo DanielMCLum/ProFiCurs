@@ -20,7 +20,7 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
 #Intancia DB (RDS)
 resource "aws_db_instance" "intanciaBD" {
     engine  = "mysql"
-    engine  = "5.7"
+    engine_version  = "5.7"
     skip_final_snapshot     = "snapshotFinal"
     instance_class          = "db.t2.micro"
     allocated_storage       = 20
