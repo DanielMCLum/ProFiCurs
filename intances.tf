@@ -4,6 +4,7 @@ resource "aws_instance" "wordpress" {
   instance_type     = "t2.micro"
   key_name          = "wordpress"
   subnet_id         = aws_subnet.publica1.id
+  iam_instance_profile = "LabInstanceProfile" 
   security_groups   = [aws_security_group.ssh.id]
   associate_public_ip_address = true
   tags = {
@@ -11,7 +12,7 @@ resource "aws_instance" "wordpress" {
   }
 }
 
-#subnet para DB
+# Grupo subnet para DB
 resource "aws_db_subnet_group" "rds_subnet_group" {
     name = "grupo_subnet_rds"
     subnet_ids = [aws_subnet.privada1.id, aws_subnet.privada2.id]

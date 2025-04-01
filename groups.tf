@@ -1,4 +1,4 @@
-#tabla de enrutamiento
+#Tabla de enrutamiento
 resource "aws_route_table_association" "publica1" {
     subnet_id   = aws_subnet.publica1.id
     route_table_id = aws_route_table.publica.id
@@ -19,20 +19,20 @@ resource "aws_route_table_association" "private2" {
     route_table_id = aws_route_table.privada.id
 }
 
-#grupos de seguridad
+#Grupos de seguridad
 resource "aws_security_group" "ssh" {
     name = "SSH"
     description = "Permisos de SSH al trafico"
     vpc_id = aws_vpc.esta.id
     ingress {
         description = "Permisos SSH"
+        protocol = "tcp"
         from_port = 22
         to_port = 22
-        protocol = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
     ingress {
-        description = "Allow HTTP"
+        description = "Permisos HTTP"
         protocol    = "tcp"
         from_port   = 80
         to_port     = 80

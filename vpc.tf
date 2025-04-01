@@ -6,7 +6,7 @@ resource "aws_vpc" "esta" {
     }
 }
 
-#subnets publicas
+#Subnets publicas
 resource "aws_subnet" "publica1" {
     vpc_id      = aws_vpc.esta.id
     cidr_block  = "10.10.1.0/24"
@@ -25,7 +25,7 @@ resource "aws_subnet" "publica2" {
     }
 }
 
-#subnets privada
+#Subnets privada
 resource "aws_subnet" "privada1" {
     vpc_id      = aws_vpc.esta.id
     cidr_block  = "10.10.3.0/24"
