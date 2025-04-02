@@ -7,6 +7,7 @@ resource "aws_instance" "wordpress" {
     iam_instance_profile        = "LabInstanceProfile" 
     security_groups             = [aws_security_group.ssh.id]
     associate_public_ip_address = true
+    
     tags = {
         Name = "wordpress-instance"
     }
