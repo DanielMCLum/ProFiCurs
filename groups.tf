@@ -10,20 +10,20 @@ resource "aws_route_table_association" "publica2" {
 }
 
 resource "aws_route_table_association" "privada1" {
-    subnet_id   = aws_subnet.privada1.id
-    route_table_id = aws_route_table.privada.id
+    subnet_id       = aws_subnet.privada1.id
+    route_table_id  = aws_route_table.privada.id
 }
 
 resource "aws_route_table_association" "private2" {
-    subnet_id   = aws_subnet.privada2.id
-    route_table_id = aws_route_table.privada.id
+    subnet_id       = aws_subnet.privada2.id
+    route_table_id  = aws_route_table.privada.id
 }
 
 #Grupos de seguridad
 resource "aws_security_group" "ssh" {
-    name = "SSH"
+    name        = "SSH"
     description = "Permisos de SSH al trafico"
-    vpc_id = aws_vpc.esta.id
+    vpc_id      = aws_vpc.esta.id
     ingress {
         description = "Permisos SSH"
         protocol = "tcp"

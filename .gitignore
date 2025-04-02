@@ -10,3 +10,5 @@
 .override.tf
 .override.tf.json
 
+# Ignorar la clave publica
+*.pem
