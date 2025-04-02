@@ -1,4 +1,5 @@
 # Generate new private key 
+/*
 resource "tls_private_key" "miClave" {
   algorithm = "RSA"
 }
@@ -15,3 +16,4 @@ resource "null_resource" "save_key_pair"  {
 	    command = "echo  ${tls_private_key.miClave.private_key_pem} > mykey.pem"
   	}
 }
+*/

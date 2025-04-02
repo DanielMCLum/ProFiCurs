@@ -1,15 +1,15 @@
 #EC2
 resource "aws_instance" "wordpress" {
-  ami               = "ami-071226ecf16aa7d96"
-  instance_type     = "t2.micro"
-  key_name          = "wordpress"
-  subnet_id         = aws_subnet.publica1.id
-  iam_instance_profile = "LabInstanceProfile" 
-  security_groups   = [aws_security_group.ssh.id]
-  associate_public_ip_address = true
-  tags = {
-    Name = "wordpress"
-  }
+    ami               = "ami-071226ecf16aa7d96"
+    instance_type     = "t2.micro"
+    key_name          = "vockey"
+    subnet_id         = aws_subnet.publica1.id
+    iam_instance_profile = "LabInstanceProfile" 
+    security_groups   = [aws_security_group.ssh.id]
+    associate_public_ip_address = true
+    tags = {
+        Name = "wordpress-instance"
+    }
 }
 
 # Grupo subnet para DB
