@@ -1,0 +1,9 @@
+[wordpress]
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mNo outputs found[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe state file either has no outputs defined, or all the defined outputs are empty. Please
+[33m│[0m [0mdefine an output in your configuration with the `output` keyword and run `terraform
+[33m│[0m [0mrefresh` for it to become available. If you are using interpolation, please verify the
+[33m│[0m [0minterpolated value is not empty. You can use the `terraform console` command to assist.
+[33m╵[0m[0m ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/my-key-pair.pem
