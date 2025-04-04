@@ -1,4 +1,4 @@
-#Tabla de enrutamiento
+# Tabla de enrutamiento
 resource "aws_route_table_association" "public1" {
     subnet_id       = aws_subnet.public1.id
     route_table_id  = aws_route_table.public.id
@@ -19,7 +19,7 @@ resource "aws_route_table_association" "private2" {
     route_table_id  = aws_route_table.private.id
 }
 
-#Grupos de seguridad para wordpress
+# Grupos de seguridad para wordpress
 resource "aws_security_group" "sg_wordpress" {
     name        = "SG-Wordpress"
     description = "Permisos a Wordpress"
@@ -38,13 +38,6 @@ resource "aws_security_group" "sg_wordpress" {
         to_port     = 80
         cidr_blocks = ["0.0.0.0/0"]
     }
-    ingress {
-        description = "Permisos BD"
-        from_port   = 3306
-        to_port     = 3306
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
     egress {
         from_port        = 0
         to_port          = 0
@@ -53,7 +46,7 @@ resource "aws_security_group" "sg_wordpress" {
         ipv6_cidr_blocks = ["::/0"]
     }
     tags = {
-        Name = "PermisosWP"
+        Name = "Grupo de seguridad WP"
     }
 }
 
@@ -69,10 +62,10 @@ resource "aws_security_group" "grupoSeguridadDB" {
         security_groups = [aws_security_group.sg_wordpress.id]
     }
     egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
     }
     tags = {
         Name = "Grupo de seguridad DB"

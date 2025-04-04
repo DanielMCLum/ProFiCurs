@@ -1,4 +1,4 @@
-#VPC (definimos la red)
+# VPC (definimos la red)
 resource "aws_vpc" "vpc" {
     cidr_block = "10.10.0.0/16"
     tags = {
@@ -6,7 +6,7 @@ resource "aws_vpc" "vpc" {
     }
 }
 
-#Subnets publicas
+# Subnets publicas
 resource "aws_subnet" "public1" {
     vpc_id              = aws_vpc.vpc.id
     cidr_block          = "10.10.1.0/24"
@@ -25,7 +25,7 @@ resource "aws_subnet" "public2" {
     }
 }
 
-#Subnets privada
+# Subnets privada
 resource "aws_subnet" "private1" {
     vpc_id              = aws_vpc.vpc.id
     cidr_block          = "10.10.3.0/24"

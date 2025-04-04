@@ -8,7 +8,7 @@ resource "aws_instance" "wordpress" {
     security_groups             = [aws_security_group.sg_wordpress.id]
     associate_public_ip_address = true
     tags = {
-        Name = "wordpress-instance"
+        Name = "WD-instance"
     }
 }
 
@@ -27,6 +27,6 @@ resource "aws_db_instance" "intanciaBD" {
     db_subnet_group_name        = aws_db_subnet_group.rds_subnet_group.name
     vpc_security_group_ids      = [aws_security_group.grupoSeguridadDB.id]
     tags = {
-        Name = "RDS Intance"
+        Name = "RDS-intance"
     } 
 }

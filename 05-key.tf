@@ -1,4 +1,6 @@
-# Generate new private key 
+// Por hacer
+
+# Genera una nueva key
 /*
 resource "tls_private_key" "miClave" {
   algorithm = "RSA"
