@@ -17,7 +17,7 @@ resource "aws_subnet" "wordpress_subnet" {
   vpc_id                  = aws_vpc.wordpress_vpc.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1a" # Asegúrate de que sea una zona válida en tu región
+  availability_zone       = "us-east-1a" # Asegurarse que sea una zona válida en tu región
 
   tags = {
     Name = "wordpress-subnet"
