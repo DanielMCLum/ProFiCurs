@@ -1,5 +1,5 @@
-resource "aws_security_group" "minio_sg" {
-    name_prefix = "minio-sg-"
+resource "aws_security_group" "minio-sg" {
+    name_prefix = "SGminio"
     vpc_id      = "aws_vpc.vpc.id"
     ingress {
         from_port   = 9000
