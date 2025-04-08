@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #AWS Provider
 terraform {
     required_providers {
@@ -11,4 +12,19 @@ terraform {
 provider "aws" {
     region  = "us-east-1"
     profile = "default"
+=======
+#AWS Provider
+terraform {
+    required_providers {
+        aws = {
+            source  = "hashicorp/aws"
+            version = "5.93.0"
+        }
+    }
+}
+
+provider "aws" {
+    region  = "us-east-1"
+    profile = "default"
+>>>>>>> Daniel
 }
