@@ -1,0 +1,8 @@
+# Ignorar el directorio .terraform
+*terraform*
+
+# Ignorar archivos temporales o específicos del sistema
+.override*
+
+# Ignorar la clave publica
+*.pem
