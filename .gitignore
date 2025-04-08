@@ -1,8 +1,5 @@
 # Ignorar el directorio .terraform
-.terraform*
-
-# Ignorar archivos de estado de Terraform
-*.tfstate*
+*terraform*
 
 # Ignorar archivos temporales o específicos del sistema
 .override*
