@@ -82,12 +82,78 @@ resource "aws_route_table" "private_rt_moodle" {
 }
 
 # Asociar las subredes a la tabla de enrutamiento
-resource "aws_route_table_association" "public1_moodle" {
+resource "aws_route_table_association" "rt_pub1asso_moodle" {
     subnet_id       = aws_subnet.public1_moodle.id
     route_table_id  = aws_route_table.public_rt_moodle.id
 }
 
-resource "aws_route_table_association" "public2_moodle" {
+resource "aws_route_table_association" "rt_pub2asso_moodle" {
     subnet_id       = aws_subnet.public2_moodle.id
     route_table_id  = aws_route_table.public_rt_moodle.id
+}
+
+resource "aws_eip" "Nat1_moodle" {
+    depends_on = [aws_route_table_association.rt_pub1asso_moodle, aws_route_table_association.rt_pub2asso_moodle]
+    vpc = true
+}
+
+resource "aws_nat_gateway" "Nat1_Gt_moodle" {
+    depends_on = [aws_eip.Nat1_moodle]
+    allocation_id = aws_eip.Nat1_moodle.id
+    subnet_id = aws_subnet.public1_moodle.id
+    tags = {
+        Name = "Nat-Gateway1"
+    }
+}
+
+resource "aws_route_table" "Nat1_Gt_rt_moodle" {
+    depends_on = [aws_nat_gateway.Nat1_Gt_moodle]
+    vpc_id = aws_vpc.vpc.id
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = aws_nat_gateway.Nat1_Gt_moodle.id
+    }
+    tags = {
+        Name = "Tabla de enrutamiento NAT 1"
+    }
+}
+
+resource "aws_route_table_association" "rt_Nat1_Gt_asso_moodle" {
+    depends_on = [aws_route_table.Nat1_Gt_rt_moodle]
+    subnet_id      = aws_subnet.private1_moodle.id
+    route_table_id = aws_route_table.Nat1_Gt_rt_moodle.id
+}
+
+resource "aws_eip" "Nat2_moodle" {
+    depends_on = [aws_route_table_association.rt_pub1asso_moodle, aws_route_table_association.rt_pub2asso_moodle]
+    vpc = true
+}
+
+resource "aws_nat_gateway" "Nat2_Gt_moodle" {
+    depends_on = [aws_eip.Nat2_moodle]
+    allocation_id = aws_eip.Nat2_moodle.id
+    subnet_id = aws_subnet.public2_moodle.id
+    tags = {
+        Name = "Nat-Gateway2"
+    }
+}
+
+resource "aws_route_table" "Nat2_Gt_rt_moodle" {
+    depends_on = [aws_nat_gateway.Nat2_Gt_moodle]
+    vpc_id = aws_vpc.vpc.id
+
+    route {
+        cidr_block = "0.0.0.0/0"
+        nat_gateway_id = aws_nat_gateway.Nat2_Gt_moodle.id
+    }
+    tags = {
+        Name = "Tabla de enrutamiento NAT 2"
+    }
+}
+
+resource "aws_route_table_association" "rt_Nat2_Gt_asso_moodle" {
+    depends_on = [aws_route_table.Nat2_Gt_rt_moodle]
+    subnet_id      = aws_subnet.private2_moodle.id
+    route_table_id = aws_route_table.Nat2_Gt_rt_moodle.id
 }
