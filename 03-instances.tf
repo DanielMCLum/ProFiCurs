@@ -1,32 +1,48 @@
-# Define una configuración de inicio para las instancias EC2 de Minio
-resource "aws_launch_template" "minio_lt" {
-    name_prefix   = "minio-lt-"
-    image_id      = "ami-0f9de6e2d2f067fca"
-    vpc_security_group_ids = [aws_security_group.minio_sg.id]
-
+# Define una configuración de inicio para las instancias EC2 de moodle
+resource "aws_launch_template" "moodle_lt" {
+    name_prefix   = "moodle_lt"
+    image_id      = "ami-084568db4383264d4"
+    instance_type = t2.micro
+    key_name      = "Vockey"
+    vpc_security_group_ids = [aws_security_group.moodle_sg.id]
     tags = {
-        Name = "templade-minio"
+        Name = "templade_moodle"
     }
 }
 
-# Define un Auto Scaling Group para las instancias de Minio
-resource "aws_autoscaling_group" "minio_asg" {
-    name_prefix        = "minio-asg-"
+# Define un Auto Scaling Group para las instancias de moodle
+resource "aws_autoscaling_group" "moodle_asg" {
+    name_prefix        = "moodle_asg"
     launch_template {
-        id      = aws_launch_template.minio_lt.id
+        id      = aws_launch_template.moodle_lt.id
         version = "$Latest"
     }
-    vpc_zone_identifier = ["aws_subnet.public1.id", "aws_subnet.public1.id"]
-    desired_capacity   = 2
-    min_size           = 2
-    max_size           = 4
+    vpc_zone_identifier = ["aws_subnet.public1_moodle.id", "aws_subnet.public2_moodle.id"]
+    desired_capacity   = 1
+    min_size           = 1
+    max_size           = 2
     health_check_type = "EC2"
 
     tags = [
         {
         key                 = "Name"
-        value               = "minio-instance"
+        value               = "instance_moodle"
         propagate_at_launch = true
         },
     ]
+}
+
+#Creo politicas para el autoescalado.
+resource "aws_autoscaling_policy" "moddle_p_asg" {
+  name           = "cpu_scaling_policy"
+  policy_type           = "TargetTrackingScaling"
+  estimated_instance_warmup = 90
+  autoscaling_group_name = aws_autoscaling_group.moodle_asg.name
+
+  target_tracking_configuration {
+      predefined_metric_specification {
+        predefined_metric_type = "ASGAverageCPUUtilization"
+      }
+      target_value = 75
+    }
 }
