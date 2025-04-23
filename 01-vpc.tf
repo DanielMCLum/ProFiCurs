@@ -4,7 +4,7 @@ resource "aws_vpc" "vpc_moodle" {
     enable_dns_support   = true
     enable_dns_hostnames = true
     tags = {
-        Name = "minio-VPC"
+        Name = "moodle-VPC"
     }
 }
 
@@ -94,7 +94,7 @@ resource "aws_route_table_association" "rt_pub2asso_moodle" {
 
 resource "aws_eip" "Nat1_moodle" {
     depends_on = [aws_route_table_association.rt_pub1asso_moodle, aws_route_table_association.rt_pub2asso_moodle]
-    vpc = true
+    domain = "vpc"
 }
 
 resource "aws_nat_gateway" "Nat1_Gt_moodle" {
@@ -126,7 +126,7 @@ resource "aws_route_table_association" "rt_Nat1_Gt_asso_moodle" {
 
 resource "aws_eip" "Nat2_moodle" {
     depends_on = [aws_route_table_association.rt_pub1asso_moodle, aws_route_table_association.rt_pub2asso_moodle]
-    vpc = true
+    domain = "vpc"
 }
 
 resource "aws_nat_gateway" "Nat2_Gt_moodle" {

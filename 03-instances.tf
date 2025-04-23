@@ -3,7 +3,7 @@ resource "aws_launch_template" "moodle_lt" {
     name_prefix   = "moodle_lt"
     image_id      = "ami-084568db4383264d4"
     instance_type = "t2.micro"
-    key_name      = "Vockey"
+    key_name      = "Vokey"
     vpc_security_group_ids = [aws_security_group.sg_moodle.id]
     tags = {
         Name = "templade_moodle"
@@ -17,7 +17,7 @@ resource "aws_autoscaling_group" "moodle_asg" {
         id      = aws_launch_template.moodle_lt.id
         version = "$Latest"
     }
-    vpc_zone_identifier = ["aws_subnet.public1_moodle.id", "aws_subnet.public2_moodle.id"]
+    vpc_zone_identifier = [aws_subnet.public1_moodle.id, aws_subnet.public2_moodle.id]
     desired_capacity   = 1
     min_size           = 1
     max_size           = 2

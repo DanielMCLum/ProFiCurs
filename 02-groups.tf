@@ -1,7 +1,7 @@
 resource "aws_security_group" "sg_moodle" {
-      name_prefix = "SG_moodle"
-      vpc_id      = "aws_vpc.vpc_moodle.id"
-      ingress {
+    name_prefix = "SG_moodle"
+    vpc_id      = aws_vpc.vpc_moodle.id
+    ingress {
       from_port   = 80
       to_port     = 80
       protocol    = "tcp"
@@ -51,5 +51,5 @@ resource "aws_security_group" "sg_rds_moodle" {
 }
 
 resource "aws_db_subnet_group" "grp_rds_moodle" {
-    subnet_ids = ["${aws_subnet.private1_moodle.id}", "${aws_subnet.private1_moodle.id}"]
+    subnet_ids = ["${aws_subnet.private1_moodle.id}", "${aws_subnet.private2_moodle.id}"]
 }

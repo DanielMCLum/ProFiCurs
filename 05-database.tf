@@ -4,10 +4,10 @@ resource "aws_rds_cluster" "moodledb-cluster" {
     engine_version       = "8.0"
     database_name        = "moodle_db"
     master_username      = "admin"
-    master_password      = "Pirineus123$" 
-    backup_retention_period = "5" // En dias 
+    master_password      = "Pirineus123$"
+    backup_retention_period = "5" // En dias
     preferred_backup_window = "01:00-01:30"
-    preferred_maintenance_window = "Fri:22:00-Sat:02:00"
+    preferred_maintenance_window = "Fri:23:00-Sat:04:00"
     skip_final_snapshot  = true
     vpc_security_group_ids = [aws_security_group.sg_rds_moodle.id]
     db_subnet_group_name   = aws_db_subnet_group.grp_rds_moodle.id
