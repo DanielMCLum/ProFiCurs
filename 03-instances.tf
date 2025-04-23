@@ -2,9 +2,9 @@
 resource "aws_launch_template" "moodle_lt" {
     name_prefix   = "moodle_lt"
     image_id      = "ami-084568db4383264d4"
-    instance_type = t2.micro
+    instance_type = "t2.micro"
     key_name      = "Vockey"
-    vpc_security_group_ids = [aws_security_group.moodle_sg.id]
+    vpc_security_group_ids = [aws_security_group.sg_moodle.id]
     tags = {
         Name = "templade_moodle"
     }
@@ -22,14 +22,6 @@ resource "aws_autoscaling_group" "moodle_asg" {
     min_size           = 1
     max_size           = 2
     health_check_type = "EC2"
-
-    tags = [
-        {
-        key                 = "Name"
-        value               = "instance_moodle"
-        propagate_at_launch = true
-        },
-    ]
 }
 
 #Creo politicas para el autoescalado.

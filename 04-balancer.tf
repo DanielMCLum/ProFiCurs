@@ -3,7 +3,7 @@ resource "aws_lb" "moodle_lb" {
     name               = "moodle-alb"
     internal           = false
     load_balancer_type = "application"
-    security_groups    = [aws_security_group.alb_sg.id]
+    security_groups    = [aws_security_group.sg_moodle.id]
     subnets            = [aws_subnet.public1_moodle.id, aws_subnet.public2_moodle.id]
 
     enable_deletion_protection = false

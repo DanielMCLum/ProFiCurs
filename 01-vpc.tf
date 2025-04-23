@@ -40,7 +40,7 @@ resource "aws_subnet" "private1_moodle" {
     }
 }
 
-resource "aws_subnet" "privade2_moodle" {
+resource "aws_subnet" "private2_moodle" {
     vpc_id              = aws_vpc.vpc_moodle.id
     cidr_block          = "10.20.4.0/24"
     availability_zone   = "us-east-1b"
@@ -108,7 +108,7 @@ resource "aws_nat_gateway" "Nat1_Gt_moodle" {
 
 resource "aws_route_table" "Nat1_Gt_rt_moodle" {
     depends_on = [aws_nat_gateway.Nat1_Gt_moodle]
-    vpc_id = aws_vpc.vpc.id
+    vpc_id = aws_vpc.vpc_moodle.id
     route {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = aws_nat_gateway.Nat1_Gt_moodle.id
@@ -140,7 +140,7 @@ resource "aws_nat_gateway" "Nat2_Gt_moodle" {
 
 resource "aws_route_table" "Nat2_Gt_rt_moodle" {
     depends_on = [aws_nat_gateway.Nat2_Gt_moodle]
-    vpc_id = aws_vpc.vpc.id
+    vpc_id = aws_vpc.vpc_moodle.id
     route {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = aws_nat_gateway.Nat2_Gt_moodle.id
