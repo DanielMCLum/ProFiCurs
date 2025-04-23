@@ -109,7 +109,6 @@ resource "aws_nat_gateway" "Nat1_Gt_moodle" {
 resource "aws_route_table" "Nat1_Gt_rt_moodle" {
     depends_on = [aws_nat_gateway.Nat1_Gt_moodle]
     vpc_id = aws_vpc.vpc.id
-
     route {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = aws_nat_gateway.Nat1_Gt_moodle.id
@@ -142,7 +141,6 @@ resource "aws_nat_gateway" "Nat2_Gt_moodle" {
 resource "aws_route_table" "Nat2_Gt_rt_moodle" {
     depends_on = [aws_nat_gateway.Nat2_Gt_moodle]
     vpc_id = aws_vpc.vpc.id
-
     route {
         cidr_block = "0.0.0.0/0"
         nat_gateway_id = aws_nat_gateway.Nat2_Gt_moodle.id
