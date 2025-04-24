@@ -1,5 +1,5 @@
 # Creamos el balanceador y el grupo de balance
-resource "aws_lb" "moodle_lb" {
+/*resource "aws_lb" "moodle_lb" {
     name               = "moodle-alb"
     internal           = false
     load_balancer_type = "application"
@@ -49,4 +49,4 @@ resource "aws_lb_listener" "http_listener" {
 resource "aws_autoscaling_attachment" "asg_attachment_alb" {
     autoscaling_group_name = aws_autoscaling_group.moodle_asg.name
     lb_target_group_arn    = aws_lb_target_group.moodle_tg.arn
-}
+}*/

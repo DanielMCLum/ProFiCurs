@@ -1,10 +1,10 @@
 # Define una configuración de inicio para las instancias EC2 de moodle
-resource "aws_launch_template" "moodle_lt" {
+/*resource "aws_launch_template" "moodle_lt" {
     name_prefix   = "moodle_lt"
     image_id      = "ami-084568db4383264d4"
     instance_type = "t2.micro"
     key_name      = "Vokey"
-    /*user_data = <<-EOF
+    user_data = <<-EOF
         #!/bin/bash
 
         # Actualizar los repositorios
@@ -37,7 +37,7 @@ resource "aws_launch_template" "moodle_lt" {
         # Opcional: Reiniciar Apache2
         sudo systemctl restart apache2
 
-    EOF*/
+    EOF
     
     vpc_security_group_ids = [aws_security_group.sg_moodle.id]
     tags = {
@@ -60,7 +60,7 @@ resource "aws_autoscaling_group" "moodle_asg" {
 }
 
 # Creo politicas para el autoescalado.
-/*resource "aws_autoscaling_policy" "moddle_p_asg" {
+resource "aws_autoscaling_policy" "moddle_p_asg" {
   name                      = "cpu_scaling_policy"
   policy_type               = "TargetTrackingScaling"
   estimated_instance_warmup = 90
