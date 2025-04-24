@@ -14,7 +14,7 @@ resource "aws_db_instance" "moodledb" {
     db_subnet_group_name   = aws_db_subnet_group.grp_rds_moodle.id
     tags = {
         Name = "RDS-intance"
-    } 
+    }
 }
 
 /*resource "aws_rds_cluster" "moodledb-cluster" {
