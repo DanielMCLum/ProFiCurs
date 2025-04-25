@@ -1,3 +1,16 @@
+resource "aws_instance" "moodle" {
+    ami                         = "ami-071226ecf16aa7d96"
+    instance_type               = "t2.micro"
+    key_name                    = "Vokey"
+    subnet_id                   = aws_subnet.public1_moodle.id
+    iam_instance_profile        = "LabInstanceProfile" 
+    security_groups             = [aws_security_group.sg_moodle.id]
+    associate_public_ip_address = true
+    tags = {
+        Name = "Moodle-instance"
+    }
+}
+
 # Define una configuración de inicio para las instancias EC2 de moodle
 /*resource "aws_launch_template" "moodle_lt" {
     name_prefix   = "moodle_lt"

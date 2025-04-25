@@ -1,0 +1,6 @@
+[moodle_instance]
+{{ terraform_ips.moodle_instance_public_ip.value }}
+
+[moodle_instance:vars]
+ansible_user=ec2-user
+ansible_private_key_file=../Vokey.pem

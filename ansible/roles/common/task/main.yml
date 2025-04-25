@@ -1,0 +1,14 @@
+---
+- name: Actualizar todos los paquetes del sistema
+  yum:
+    name: "*"
+    state: latest
+
+- name: Instalar paquetes necesarios
+  yum:
+    name:
+      - git
+      - wget
+      - unzip
+      - mariadb-client
+    state: present
