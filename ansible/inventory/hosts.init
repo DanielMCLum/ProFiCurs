@@ -1,5 +1,5 @@
 [moodle_instance]
-{{ terraform_ips.moodle_instance_public_ip.value }}
+98.81.70.156
 
 [moodle_instance:vars]
 ansible_user=ec2-user

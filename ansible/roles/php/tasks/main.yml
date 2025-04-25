@@ -1,0 +1,40 @@
+---
+- name: Habilitar el repositorio Remi para PHP
+  yum:
+    name: https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+    state: present
+
+- name: Instalar PHP y extensiones necesarias
+  yum:
+    name:
+      - php{{ moodle_version.split('.')[0] }}-php-fpm
+      - php{{ moodle_version.split('.')[0] }}-php-mysqlnd
+      - php{{ moodle_version.split('.')[0] }}-php-xml
+      - php{{ moodle_version.split('.')[0] }}-php-mbstring
+      - php{{ moodle_version.split('.')[0] }}-php-gd
+      - php{{ moodle_version.split('.')[0] }}-php-curl
+      - php{{ moodle_version.split('.')[0] }}-php-zip
+      - php{{ moodle_version.split('.')[0] }}-php-intl
+      - php{{ moodle_version.split('.')[0] }}-php-opcache
+    state: present
+    enablerepo: remi-php{{ moodle_version.split('.')[0] }}
+
+- name: Configurar PHP-FPM para usar el usuario de Nginx
+  ini_file:
+    path: /etc/php-fpm.d/www.conf
+    section: www
+    option: user
+    value: "{{ php_fpm_user }}"
+
+- name: Configurar PHP-FPM para usar el grupo de Nginx
+  ini_file:
+    path: /etc/php-fpm.d/www.conf
+    section: www
+    option: group
+    value: "{{ php_fpm_user }}"
+
+- name: Iniciar y habilitar php-fpm
+  service:
+    name: php-fpm
+    state: started
+    enabled: true
