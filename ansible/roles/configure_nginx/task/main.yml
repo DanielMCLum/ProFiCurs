@@ -1,0 +1,11 @@
+---
+- name: Instalar Nginx
+  yum:
+    name: nginx
+    state: present
+
+- name: Iniciar y habilitar Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: true
