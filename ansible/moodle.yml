@@ -1,0 +1,184 @@
+---
+- hosts: moodle_instance
+  become: true
+  vars:
+    moodle_version: "4.2"
+    moodle_directory: /var/www/html/moodle
+    moodle_datadir: /var/moodledata
+    nginx_server_name: "{{ ansible_default_ipv4.address }}"
+    php_fpm_user: nginx
+    database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306" # Reemplaza 'your_rds_endpoint' y considera usar terraform_output
+    database_name: moodle_db
+    database_user: admin
+    database_password: "Pirineus123$"
+  
+  tasks:
+    - name: Actualizar todos los paquetes del sistema
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Instalar paquetes necesarios
+      yum:
+        name:
+          - git
+          - wget
+          - unzip
+          - mariadb-client
+        state: present
+
+  tasks:
+    - name: Instalar Nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Iniciar y habilitar Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  tasks:
+    - name: Habilitar el repositorio Remi para PHP
+      yum:
+        name: https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
+        state: present
+
+    - name: Instalar PHP y extensiones necesarias
+      yum:
+        name:
+          - php{{ moodle_version.split('.')[0] }}-php-fpm
+          - php{{ moodle_version.split('.')[0] }}-php-mysqlnd
+          - php{{ moodle_version.split('.')[0] }}-php-xml
+          - php{{ moodle_version.split('.')[0] }}-php-mbstring
+          - php{{ moodle_version.split('.')[0] }}-php-gd
+          - php{{ moodle_version.split('.')[0] }}-php-curl
+          - php{{ moodle_version.split('.')[0] }}-php-zip
+          - php{{ moodle_version.split('.')[0] }}-php-intl
+          - php{{ moodle_version.split('.')[0] }}-php-opcache
+        state: present
+        enablerepo: remi-php{{ moodle_version.split('.')[0] }}
+
+    - name: Configurar PHP-FPM para usar el usuario de Nginx
+      ini_file:
+        path: /etc/php-fpm.d/www.conf
+        section: www
+        option: user
+        value: "{{ php_fpm_user }}"
+
+    - name: Configurar PHP-FPM para usar el grupo de Nginx
+      ini_file:
+        path: /etc/php-fpm.d/www.conf
+        section: www
+        option: group
+        value: "{{ php_fpm_user }}"
+
+    - name: Iniciar y habilitar php-fpm
+      service:
+        name: php-fpm
+        state: started
+        enabled: true
+  tasks:
+    - name: Crear directorio para Moodle
+      file:
+        path: "{{ moodle_directory }}"
+        state: directory
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_user }}"
+        mode: '0755'
+        recurse: yes
+
+    - name: Crear directorio para los datos de Moodle
+      file:
+        path: "{{ moodle_datadir }}"
+        state: directory
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_user }}"
+        mode: '0777'
+        recurse: yes
+
+    - name: Descargar Moodle
+      get_url:
+        url: https://download.moodle.org/download.php/direct/stable{{ moodle_version | replace('.', '') }}/moodle-{{ moodle_version }}.zip
+        dest: /tmp/moodle-{{ moodle_version }}.zip
+        validate_certs: no
+
+    - name: Descomprimir Moodle
+      unarchive:
+        src: /tmp/moodle-{{ moodle_version }}.zip
+        dest: /var/www/html/
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_user }}"
+        creates: "{{ moodle_directory }}/index.php"
+        remote_src: yes
+
+    - name: Copiar archivo de configuración de ejemplo
+      copy:
+        src: "{{ moodle_directory }}/config-dist.php"
+        dest: "{{ moodle_directory }}/config.php"
+        owner: "{{ php_fpm_user }}"
+        group: "{{ php_fpm_user }}"
+        mode: '0644'
+
+    - name: Configurar archivo config.php
+      lineinfile:
+        path: "{{ moodle_directory }}/config.php"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+        - { regexp: "$CFG->dbtype    = 'mysqli';", line: "$CFG->dbtype    = 'mysqli';" }
+        - { regexp: "$CFG->dblibrary = 'native';", line: "$CFG->dblibrary = 'native';" }
+        - { regexp: "$CFG->dbhost    = 'localhost';", line: "$CFG->dbhost    = '{{ database_host }}';" }
+        - { regexp: "$CFG->dbname    = 'moodle';", line: "$CFG->dbname    = '{{ database_name }}';" }
+        - { regexp: "$CFG->dbuser    = 'root';", line: "$CFG->dbuser    = '{{ database_user }}';" }
+        - { regexp: "$CFG->dbpass    = '';", line: "$CFG->dbpass    = '{{ database_password | quote }}';" }
+        - { regexp: "$CFG->wwwroot   = 'http://chirterfir.cat\/moodle';", line: "$CFG->wwwroot   = 'http://chirterfir.cat';" }
+        - { regexp: "$CFG->dataroot  = '/var/moodledata';", line: "$CFG->dataroot  = '{{ moodle_datadir }}';" }
+      notify:
+        - restart php-fpm
+  tasks:
+    - name: Configurar para Moodle con SSL y PHP-FPM
+      copy:
+        dest: "/etc/nginx/sites-available/moodle.conf"
+        content: |
+          server {
+              listen 80;
+              server_name {{ chirterfir.cat }};
+              root {{ moodle_directory }};
+              index index.php;
+
+              access_log /var/log/nginx/moodle.access.log;
+              error_log /var/log/nginx/moodle.error.log;
+
+              location / {
+                  try_files $uri $uri/ /index.php?$query_string;
+              }
+
+              location ~ \.php$ {
+                  try_files $uri =404;
+                  fastcgi_pass unix:/run/php-fpm/www.sock;
+                  fastcgi_index index.php;
+                  fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                  include fastcgi_params;
+              }
+
+              location ~ /\.ht {
+                  deny all;
+              }
+
+              location /moodledata/ {
+                  internal;
+              }
+          }
+          nginx_server_name
+  handlers:
+    - name: restart php-fpm
+      service:
+        name: php-fpm
+        state: restarted
+
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

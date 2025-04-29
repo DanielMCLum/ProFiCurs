@@ -2,6 +2,14 @@ resource "aws_security_group" "sg_moodle" {
     name_prefix = "SG_moodle"
     vpc_id      = aws_vpc.vpc_moodle.id
     ingress {
+      protocol    = "tcp"
+      from_port   = 22
+      to_port     = 22
+      cidr_blocks = ["0.0.0.0/0"]
+      description = "Permitir trafico SSH"
+      
+    }
+    ingress {
       from_port   = 80
       to_port     = 80
       protocol    = "tcp"
