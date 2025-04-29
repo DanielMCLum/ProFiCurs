@@ -7,11 +7,11 @@
     moodle_datadir: /var/moodledata
     nginx_server_name: "{{ ansible_default_ipv4.address }}"
     php_fpm_user: nginx
-    database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306" # Reemplaza 'your_rds_endpoint' y considera usar terraform_output
+    database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306"
     database_name: moodle_db
     database_user: admin
     database_password: "Pirineus123$"
-  
+
   tasks:
     - name: Actualizar todos los paquetes del sistema
       yum:
@@ -24,10 +24,10 @@
           - git
           - wget
           - unzip
-          - mariadb-client
+          - mariadb105-devel.x86_64
+          - mariadb-connector-c.x86_64
         state: present
 
-  tasks:
     - name: Instalar Nginx
       yum:
         name: nginx
@@ -39,11 +39,15 @@
         state: started
         enabled: true
 
-  tasks:
-    - name: Habilitar el repositorio Remi para PHP
-      yum:
-        name: https://rpms.remirepo.net/enterprise/remi-release-{{ ansible_distribution_major_version }}.rpm
-        state: present
+    #- name: Habilitar el repositorio EPEL
+    # yum:
+    #    name: "https://dl.fedoraproject.org/pub/epel/#:~:text=epel%2Drelease%2Dlatest%2D8.noarch.rpm"
+    #    state: present
+
+    #- name: Habilitar el repositorio Remi para PHP
+    #  yum:
+    #    name: https://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    #    state: present*/
 
     - name: Instalar PHP y extensiones necesarias
       yum:
@@ -79,7 +83,7 @@
         name: php-fpm
         state: started
         enabled: true
-  tasks:
+
     - name: Crear directorio para Moodle
       file:
         path: "{{ moodle_directory }}"
@@ -127,24 +131,24 @@
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
       with_items:
-        - { regexp: "$CFG->dbtype    = 'mysqli';", line: "$CFG->dbtype    = 'mysqli';" }
-        - { regexp: "$CFG->dblibrary = 'native';", line: "$CFG->dblibrary = 'native';" }
-        - { regexp: "$CFG->dbhost    = 'localhost';", line: "$CFG->dbhost    = '{{ database_host }}';" }
-        - { regexp: "$CFG->dbname    = 'moodle';", line: "$CFG->dbname    = '{{ database_name }}';" }
-        - { regexp: "$CFG->dbuser    = 'root';", line: "$CFG->dbuser    = '{{ database_user }}';" }
-        - { regexp: "$CFG->dbpass    = '';", line: "$CFG->dbpass    = '{{ database_password | quote }}';" }
-        - { regexp: "$CFG->wwwroot   = 'http://chirterfir.cat\/moodle';", line: "$CFG->wwwroot   = 'http://chirterfir.cat';" }
-        - { regexp: "$CFG->dataroot  = '/var/moodledata';", line: "$CFG->dataroot  = '{{ moodle_datadir }}';" }
+        - { regexp: "\\$CFG->dbtype    = 'mysqli';", line: "$CFG->dbtype    = 'mysqli';" }
+        - { regexp: "\\$CFG->dblibrary = 'native';", line: "$CFG->dblibrary = 'native';" }
+        - { regexp: "\\$CFG->dbhost    = 'localhost';", line: "$CFG->dbhost    = '{{ database_host }}';" }
+        - { regexp: "\\$CFG->dbname    = 'moodle';", line: "$CFG->dbname    = '{{ database_name }}';" }
+        - { regexp: "\\$CFG->dbuser    = 'root';", line: "$CFG->dbuser    = '{{ database_user }}';" }
+        - { regexp: "\\$CFG->dbpass    = '';", line: "$CFG->dbpass    = '{{ database_password | quote }}';" }
+        - { regexp: "\\$CFG->wwwroot   = 'http://chirterfir.cat/moodle';", line: "$CFG->wwwroot   = 'http://chirterfir.cat';" }
+        - { regexp: "\\$CFG->dataroot  = '/var/moodledata';", line: "$CFG->dataroot  = '{{ moodle_datadir }}';" }
       notify:
         - restart php-fpm
-  tasks:
-    - name: Configurar para Moodle con SSL y PHP-FPM
+
+    - name: Configurar Nginx para Moodle
       copy:
-        dest: "/etc/nginx/sites-available/moodle.conf"
+        dest: "/etc/nginx/conf.d/moodle.conf" # Corrección de la ruta para Amazon Linux
         content: |
           server {
               listen 80;
-              server_name {{ chirterfir.cat }};
+              server_name chirterfir.cat;
               root {{ moodle_directory }};
               index index.php;
 
@@ -171,7 +175,9 @@
                   internal;
               }
           }
-          nginx_server_name
+      notify:
+        - restart nginx
+
   handlers:
     - name: restart php-fpm
       service:
