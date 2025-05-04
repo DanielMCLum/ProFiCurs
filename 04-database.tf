@@ -2,7 +2,7 @@ resource "aws_db_instance" "moodledb" {
     engine                      = "mysql"
     engine_version              = "8.0"
     skip_final_snapshot         = true
-    multi_az                    = true
+    //multi_az                    = true
     final_snapshot_identifier   = "my-final-snapshot"
     instance_class              = "db.t3.micro"
     allocated_storage           = 20
