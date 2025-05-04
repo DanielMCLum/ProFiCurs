@@ -1,0 +1,28 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name {{ nginx_server_name }};
+    root {{ moodle_install_dir }};
+    index index.php index.html index.htm;
+
+    access_log /var/log/nginx/{{ nginx_server_name }}.access.log;
+    error_log /var/log/nginx/{{ nginx_server_name }}.error.log;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php*-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    location /moodledata/ {
+        internal;
+    }
+}
