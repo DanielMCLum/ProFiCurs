@@ -3,33 +3,35 @@
   hosts: moodle_instance
   become: true
   vars:
-    moodle_version: "4.3"
-    moodle_download_url: "https://download.moodle.org/download.php/direct/stable{{ moodle_version }}/moodle-{{ moodle_version }}.tgz"
+    moodle_version: "5.0"
+    moodle_download_url: "https://download.moodle.org/download.php/direct/stable500/moodle-{{ moodle_version }}.tgz"
     moodle_install_dir: /var/www/moodle
     moodle_datadir: /var/moodledata
-    nginx_server_name: "44.195.90.27"
+    nginx_server_name: "chirterfir.foo"
     php_fpm_user: nginx
     database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306" # Reemplazar
     database_name: moodle_db
     database_user: admin
     database_password: "Pirineus123$"
+    php_ver: "8.3"
     php_extensions:
-      - php-fpm
-      - php-mysqlnd
-      - php-xml
-      - php-curl
-      - php-gd
-      - php-intl
-      - php-mbstring
-      - php-soap
-      - php-xmlrpc
-      - php-zip
-      - php-opcache
+      - php{{ php_ver }}-fpm
+      - php{{ php_ver }}-cli
+      - php{{ php_ver }}-mysql
+      - php{{ php_ver }}-xml
+      - php{{ php_ver }}-mbstring
+      - php{{ php_ver }}-curl
+      - php{{ php_ver }}-zip
+      - php{{ php_ver }}-gd
+      - php{{ php_ver }}-intl
+      - php{{ php_ver }}-soap
+      - php{{ php_ver }}-bcmath
+      - php{{ php_ver }}-redis
 
   tasks:
     - name: Actualizar
       become: true
-      apt-get:
+      apt:
         upgrade: yes
         update_cache: yes
     - name: Asegurar que los paquetes esenciales estén instalados
@@ -42,7 +44,7 @@
         state: present
         update_cache: true
 
-    - name: Añadir repositorio de PHP (si es necesario)
+    - name: Añadir repositorio de PHP
       apt_repository:
         repo: ppa:ondrej/php
         state: present
@@ -89,7 +91,7 @@
 
     - name: Configurar PHP-FPM (ajusta según tus necesidades)
       ini_file:
-        path: /etc/php/*/fpm/php.ini
+        path: /etc/php/{{ php_ver }}/fpm/php.ini
         section: PHP
         option: max_execution_time
         value: 300
@@ -98,7 +100,7 @@
     - name: Configurar PHP-FPM pool (ajusta según tus necesidades)
       template:
         src: templates/php_fpm_pool.conf.j2
-        dest: /etc/php/*/fpm/pool.d/www.conf
+        dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
       notify: Reiniciar PHP-FPM
 
     - name: Crear directorio de instalación de Moodle
@@ -157,7 +159,7 @@
 
     - name: Reiniciar PHP-FPM
       service:
-        name: php*-fpm
+        name: php{{ php_ver }}-fpm
         state: restarted
 
     - name: Crear directorio de logs de Nginx
@@ -174,3 +176,10 @@
         dest: /etc/nginx/sites-enabled/moodle
         state: link
       notify: Reiniciar Nginx
+
+    - name: Cambiar propiedad del directorio de Moodle
+      file:
+        path: "{{ moodle_install_dir }}"
+        owner: www-data
+        group: www-data
+        recurse: yes
