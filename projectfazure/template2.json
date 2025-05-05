@@ -1,0 +1,37 @@
+{
+    "variables": {
+      "client_id": "8231264a-3292-48a7-96ee-a6f3bedd9fd",
+      "client_secret": "9gi8Q-KPaQXwrmJn-9fU1oYMaT4epcJ4T9QdB",
+      "tenant_id": "836f1d43-90b9-41eb-815f-6e37bd65ff30",
+      "subscription_id": "9c83b4e6-cccc-4027-b0b1-3c6ff5807320"
+    },
+    "builders": [
+      {
+        "type": "azure-arm",
+        "client_id": "{{user `client_id`}}",
+        "client_secret": "{{user `client_secret`}}",
+        "tenant_id": "{{user `tenant_id`}}",
+        "subscription_id": "{{user `subscription_id`}}",
+        "managed_image_name": "myPackerImage",
+        "managed_image_resource_group_name": "myPackerImages",
+        "location": "eastus",
+        "image_publisher": "Canonical",
+        "image_offer": "UbuntuServer",
+        "image_sku": "16.04-LTS",
+        "os_type": "Linux",
+        "vm_size": "Standard_DS2_v2"
+      }
+    ],
+    "provisioners": [
+      {
+        "type": "shell",
+        "inline": [
+          "sudo apt-get update",
+          "sudo apt-get upgrade -y",
+          "sudo apt-get -y install nginx",
+          "sudo waagent -force -deprovision+user && export HISTSIZE=0 && sync"
+        ]
+      }
+    ]
+  }
+  
