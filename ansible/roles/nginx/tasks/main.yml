@@ -38,9 +38,9 @@
     state: started
     enabled: yes
 
-- name: Copiar configuración de Nginx para PHP y WordPress
+- name: Plantilla de configuración Nginx con PHP dinámico
   copy:
-    src: default
+    src: templates/default.conf.j2
     dest: /etc/nginx/sites-available/default
     owner: root
     group: root

@@ -5,7 +5,6 @@
       - php8.1-cli
       - php8.1-fpm
       - php8.1-mysql
-      - libapache2-mod-php
       - php-mbstring
       - php-curl
       - php-xml
