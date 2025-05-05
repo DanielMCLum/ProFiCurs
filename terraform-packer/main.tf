@@ -19,28 +19,23 @@ resource "azurerm_service_plan" "wp" {
 
 # 3. App Service para WordPress
 resource "azurerm_linux_web_app" "wp" {
-  name                = "wordpress-student-app-${random_string.suffix.result}"  # Nombre único
+  name                = "wordpress-app-${random_string.suffix.result}"
   location            = azurerm_resource_group.wp.location
   resource_group_name = azurerm_resource_group.wp.name
   service_plan_id     = azurerm_service_plan.wp.id
 
   site_config {
-    linux_fx_version = "PHP|8.2"  # Versión compatible con WordPress
-    always_on        = false       # Requerido para plan F1 gratis
-    
     application_stack {
-      php_version = "8.2"
+      php_version = "8.2"  # Versión PHP para WordPress
     }
+    always_on = false  # Necesario para plan F1 gratis
   }
 
   app_settings = {
-    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "true"  # Almacenamiento persistente
-    
-    # Configuración de WordPress
-    "WORDPRESS_DB_HOST"            = azurerm_mysql_flexible_server.wp.fqdn
-    "WORDPRESS_DB_USER"            = azurerm_mysql_flexible_server.wp.administrator_login
-    "WORDPRESS_DB_PASSWORD"        = azurerm_mysql_flexible_server.wp.administrator_password
-    "WORDPRESS_DB_NAME"            = "wordpress"
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "true"
+    "WORDPRESS_DB_HOST"                   = azurerm_mysql_flexible_server.wp.fqdn
+    "WORDPRESS_DB_USER"                   = azurerm_mysql_flexible_server.wp.administrator_login
+    "WORDPRESS_DB_PASSWORD"               = var.mysql_admin_password
     "WEBSITES_CONTAINER_START_TIME_LIMIT" = "600"  # Tiempo extra para instalar WP
   }
 
@@ -53,24 +48,27 @@ resource "azurerm_linux_web_app" "wp" {
 
 # 4. Base de datos MySQL (SKU más económica)
 resource "azurerm_mysql_flexible_server" "wp" {
-  name                = "wordpress-db-${random_string.suffix.result}"
+  name                = "wordpress-db-${random_string.suffix.result}" # Nombre único
   location            = azurerm_resource_group.wp.location
   resource_group_name = azurerm_resource_group.wp.name
   
-  # SKU económica (≈ $15 USD/mes)
-  sku_name            = "B_Standard_B1s"
-  storage_mb          = 5120  # 5 GB (mínimo para WordPress)
-  version             = "8.0.21"
+  # SKU económica verificada para estudiantes
+  sku_name   = "B_Standard_B1ms"  # Burstable con 1 vCore y 2GB RAM
+  version    = "8.0.21"
+  
+  storage {
+    size_gb           = 20  # Mínimo requerido ahora
+    auto_grow_enabled = false # Para controlar costos
+    iops              = 360 # Mínimo para 20GB
+  }
 
   administrator_login          = "wpadmin"
-  administrator_password       = "P@ssw0rd123!${random_string.suffix.result}"  # Contraseña segura
-  backup_retention_days        = 7
+  administrator_password       = var.mysql_admin_password
   
-  high_availability {
-    mode = "SameZone"  # Opcional para mayor disponibilidad (aumenta costo)
-  }
+  backup_retention_days        = 1  # Mínimo permitido para ahorrar
+  geo_redundant_backup_enabled = false
 }
-
+  
 # 5. Base de datos WordPress
 resource "azurerm_mysql_flexible_database" "wp" {
   name                = "wordpress"
