@@ -1,13 +1,13 @@
 ---
 - name: Leer outputs de Terraform
   slurp:
-    src: terraform_output.json
+    src: ../terraform_output.json
   register: terraform_output_json
 
 - name: Establecer fact de Terraform
   set_fact:
     terraform: "{{ terraform_output_json.content | b64decode | from_json }}"
-    
+
 - name: Configurar servidor web para Moodle
   hosts: moodle_instance
   become: true
@@ -18,7 +18,7 @@
     moodle_datadir: /var/moodledata
     nginx_server_name: "chirterfir.cat"
     php_fpm_user: www-data
-    database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306" # Reemplazar
+    database_host: "{{ rds_endpoint.value }}"
     database_name: moodle_db
     database_user: admin
     database_password: "Pirineus123$"
