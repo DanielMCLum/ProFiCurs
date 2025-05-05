@@ -1,7 +1,7 @@
 resource "aws_instance" "moodle" {
     ami                         = "ami-084568db4383264d4"
     instance_type               = "t2.micro"
-    key_name                    = "Vokei2"
+    key_name                    = "Vokey"
     subnet_id                   = aws_subnet.public1_moodle.id
     iam_instance_profile        = "LabInstanceProfile" 
     security_groups             = [aws_security_group.sg_moodle.id]

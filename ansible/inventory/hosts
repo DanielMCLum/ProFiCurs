@@ -1,6 +1,6 @@
 [moodle_instance]
-44.192.126.158
+44.204.243.152
 
 [moodle_instance:vars]
 ansible_user=ubuntu
-ansible_private_key_file=../Vokei2.pem
+ansible_private_key_file=../Vokey.pem

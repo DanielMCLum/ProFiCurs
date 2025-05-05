@@ -1,4 +1,13 @@
 ---
+- name: Leer outputs de Terraform
+  slurp:
+    src: terraform_output.json
+  register: terraform_output_json
+
+- name: Establecer fact de Terraform
+  set_fact:
+    terraform: "{{ terraform_output_json.content | b64decode | from_json }}"
+    
 - name: Configurar servidor web para Moodle
   hosts: moodle_instance
   become: true
@@ -7,8 +16,8 @@
     moodle_download_url: "https://download.moodle.org/download.php/direct/stable500/moodle-{{ moodle_version }}.tgz"
     moodle_install_dir: /var/www/moodle
     moodle_datadir: /var/moodledata
-    nginx_server_name: "chirterfir.foo"
-    php_fpm_user: nginx
+    nginx_server_name: "chirterfir.cat"
+    php_fpm_user: www-data
     database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306" # Reemplazar
     database_name: moodle_db
     database_user: admin
@@ -34,6 +43,7 @@
       apt:
         upgrade: yes
         update_cache: yes
+
     - name: Asegurar que los paquetes esenciales estén instalados
       apt:
         name:
@@ -113,11 +123,38 @@
 
     - name: Crear directorio de datos de Moodle
       file:
-        path: "{{ moodle_datadir }}"
+        path: "{{ moodle_install_dir }}"
         state: directory
         owner: www-data
         group: www-data
         mode: '0777'
+
+    #- name: Configurar fichero config.php de Moodle
+    #  template:
+    #    src: templates/config.php.j2
+    #    dest: "{{ moodle_dir }}/config.php"
+    #    owner: www-data
+    #    group: www-data
+    #    mode: '0644'
+    #  notify: Reiniciar PHP-FPM
+
+    - name: Configurar pool de PHP-FPM
+      template:
+        src: templates/php_fpm_pool.conf.j2
+        dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
+      vars:
+        php_fpm_user: "www-data"
+      register: result
+      failed_when: result.failed
+
+    - name: Asegurar la propiedad del directorio del socket de PHP-FPM
+      file:
+        path: /run/php/
+        owner: www-data
+        group: www-data
+        recurse: yes
+      register: result
+      failed_when: result.failed
 
     - name: Descargar Moodle
       get_url:
