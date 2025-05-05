@@ -1,3 +1,3 @@
-output "instance_ip" {
-  value = aws_instance.web.public_ip
+output "wordpress_public_ip" {
+  value = aws_eip.wp_eip.public_ip
 }

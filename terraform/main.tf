@@ -1,15 +1,25 @@
-provider "aws" {
-  region = "us-east-1"
+# Genera claves SSH y las guarda localmente
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "local_file" "private_key" {
+  filename = "${path.module}/devops.pem"
+  content  = tls_private_key.ssh_key.private_key_pem
+  file_permission = "0600"
 }
 
 resource "aws_key_pair" "deployer" {
-  key_name   = "deployer-key"
-  public_key = file("~/.ssh/deployer-key.pub")
+  key_name   = var.key_name
+  public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
-resource "aws_security_group" "web_sg" {
-  name        = "web_sg"
+# Security Group
+resource "aws_security_group" "wordpress_sg" {
+  name        = "wordpress-sg"
   description = "Allow SSH, HTTP, and HTTPS"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
     from_port   = 22
@@ -40,17 +50,28 @@ resource "aws_security_group" "web_sg" {
   }
 }
 
-resource "aws_instance" "web" {
-  ami                         = "ami-053b0d53c279acc90"
-  instance_type               = "t2.micro"
+
+# Obtener VPC default (para no tener que crear una nueva)
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Crear instancia EC2
+resource "aws_instance" "wordpress" {
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
   key_name                    = aws_key_pair.deployer.key_name
-  vpc_security_group_ids      = [aws_security_group.web_sg.id]
+  vpc_security_group_ids      = [aws_security_group.wordpress_sg.id]
+  associate_public_ip_address = true
 
   tags = {
-    Name = "ubuntu-web-server"
-  }
-
-  provisioner "local-exec" {
-    command = "echo ${self.public_ip} > ../ansible/hosts_ip.txt"
+    Name = "wordpress-server"
   }
 }
+
+# Elastic IP
+resource "aws_eip" "wp_eip" {
+  instance = aws_instance.wordpress.id
+  domain = "vpc"
+}
+

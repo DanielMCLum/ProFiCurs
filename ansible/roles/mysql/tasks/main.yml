@@ -1,0 +1,30 @@
+- name: Instalar dependencias Python para Ansible + MySQL
+  apt:
+    name: python3-pymysql
+    state: present
+
+- name: Instalar MySQL Server
+  apt:
+    name: mysql-server
+    state: present
+
+- name: Asegurar que MySQL está iniciado
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: Crear base de datos para WordPress
+  mysql_db:
+    name: wordpress
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Crear usuario para WordPress
+  community.mysql.mysql_user:
+    name: "{{ wp_db_user }}"
+    password: "{{ wp_db_password }}"
+    host: "localhost"
+    priv: "{{ wp_db_name }}.*:ALL"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock

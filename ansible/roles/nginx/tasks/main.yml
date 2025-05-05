@@ -1,0 +1,48 @@
+---
+- name: Detener Apache2 si está en ejecución
+  service:
+    name: apache2
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Eliminar Apache2 si está instalado
+  apt:
+    name: apache2
+    state: absent
+    purge: yes
+    autoremove: yes
+
+- name: Eliminar configuraciones residuales de Apache
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apache2
+    - /var/www/html/index.html
+  ignore_errors: true
+
+- name: Actualizar apt
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Instalar Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Iniciar y habilitar Nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Copiar configuración de Nginx para PHP y WordPress
+  copy:
+    src: default
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Recargar Nginx

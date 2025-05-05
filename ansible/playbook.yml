@@ -1,40 +1,8 @@
----
-- name: Configurar servidor web en Ubuntu
+- name: Configurar servidor WordPress con LEMP
   hosts: web
-  become: true
-
-  tasks:
-    - name: Actualizar apt
-      apt:
-        update_cache: yes
-
-    - name: Instalar Nginx
-      apt:
-        name: nginx
-        state: present
-
-    - name: Asegurar que Nginx esté iniciado y habilitado
-      service:
-        name: nginx
-        state: started
-        enabled: yes
-
-    - name: Copiar página personalizada
-      copy:
-        src: files/index.html
-        dest: /var/www/html/index.html
-
-    - name: Instalar Certbot y plugin de Nginx
-      apt:
-        name:
-          - certbot
-          - python3-certbot-nginx
-        state: present
-
-    - name: Obtener certificado SSL con Certbot
-      command: >
-        certbot --nginx --non-interactive
-        --agree-tos --email contacto-caleit@gmail.com
-        -d tu-dominio.com
-      args:
-        creates: /etc/letsencrypt/live/caleit.cat
+  become: yes
+  roles:
+    - nginx
+    - php
+    - mysql
+    - wordpress
