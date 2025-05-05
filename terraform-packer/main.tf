@@ -1,18 +1,14 @@
 # Configuración principal de WordPress en Azure (para estudiantes)
 # Archivo: main.tf
 
-# 1. Proveedor Azure
-provider "azurerm" {
-  features {}
-}
 
-# 2. Grupo de recursos
+# 1. Grupo de recursos
 resource "azurerm_resource_group" "wp" {
   name     = "wordpress-student-rg"
   location = "eastus"  # Región con más beneficios gratuitos
 }
 
-# 3. App Service Plan (GRATIS con límites)
+# 2. App Service Plan (GRATIS con límites)
 resource "azurerm_service_plan" "wp" {
   name                = "wordpress-free-plan"
   location            = azurerm_resource_group.wp.location
@@ -21,7 +17,7 @@ resource "azurerm_service_plan" "wp" {
   sku_name            = "F1"  # Plan gratuito (60 mins CPU/día)
 }
 
-# 4. App Service para WordPress
+# 3. App Service para WordPress
 resource "azurerm_linux_web_app" "wp" {
   name                = "wordpress-student-app-${random_string.suffix.result}"  # Nombre único
   location            = azurerm_resource_group.wp.location
@@ -55,7 +51,7 @@ resource "azurerm_linux_web_app" "wp" {
   }
 }
 
-# 5. Base de datos MySQL (SKU más económica)
+# 4. Base de datos MySQL (SKU más económica)
 resource "azurerm_mysql_flexible_server" "wp" {
   name                = "wordpress-db-${random_string.suffix.result}"
   location            = azurerm_resource_group.wp.location
@@ -75,7 +71,7 @@ resource "azurerm_mysql_flexible_server" "wp" {
   }
 }
 
-# 6. Base de datos WordPress
+# 5. Base de datos WordPress
 resource "azurerm_mysql_flexible_database" "wp" {
   name                = "wordpress"
   resource_group_name = azurerm_resource_group.wp.name
@@ -84,14 +80,14 @@ resource "azurerm_mysql_flexible_database" "wp" {
   collation           = "utf8mb4_unicode_ci"
 }
 
-# 7. Sufijo aleatorio para nombres únicos
+# 6. Sufijo aleatorio para nombres únicos
 resource "random_string" "suffix" {
   length  = 6
   special = false
   upper   = false
 }
 
-# 8. Reglas de firewall para MySQL (permite conexiones desde App Service)
+# 7. Reglas de firewall para MySQL (permite conexiones desde App Service)
 resource "azurerm_mysql_flexible_server_firewall_rule" "azure_services" {
   name                = "allow-azure-services"
   resource_group_name = azurerm_resource_group.wp.name
