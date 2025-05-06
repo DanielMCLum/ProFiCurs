@@ -9,6 +9,9 @@ output "rds_endpoint" {
 }
 
 resource "null_resource" "output_to_json" {
+    depends_on = [
+        aws_db_instance.moodledb,
+    ]
     provisioner "local-exec" {
         command = "bash terraform_output.sh"
     }
