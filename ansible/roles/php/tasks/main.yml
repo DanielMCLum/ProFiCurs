@@ -1,0 +1,34 @@
+---
+- name: Añadir repositorio de PHP
+  apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: yes
+
+- name: Instalar PHP y extensiones necesarias
+  apt:
+    name: "{{ php_extensions }}"
+    state: present
+
+- name: Configurar PHP-FPM (ajusta según tus necesidades)
+  ini_file:
+    path: /etc/php/{{ php_ver }}/fpm/php.ini
+    section: PHP
+    option: max_execution_time
+    value: 300
+  notify: Reiniciar PHP-FPM
+
+- name: Configurar pool de PHP-FPM
+  template:
+    src: templates/php_fpm_pool.conf.j2
+    dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
+  vars:
+    php_fpm_user: "{{ php_fpm_user }}"
+  notify: Reiniciar PHP-FPM
+
+- name: Asegurar la propiedad del directorio del socket de PHP-FPM
+  file:
+    path: /run/php/
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+    recurse: yes

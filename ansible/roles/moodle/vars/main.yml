@@ -1,0 +1,5 @@
+---
+moodle_version: "5.0"
+moodle_download_url: "https://download.moodle.org/download.php/direct/stable{{ moodle_version | replace('.', '') }}0/moodle-{{ moodle_version }}.tgz"
+moodle_install_dir: /var/www/moodle
+moodle_datadir: /var/moodledata

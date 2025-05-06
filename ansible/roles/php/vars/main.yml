@@ -1,0 +1,15 @@
+---
+php_ver: "8.3"
+php_extensions:
+  - php{{ php_ver }}-fpm
+  - php{{ php_ver }}-cli
+  - php{{ php_ver }}-mysql
+  - php{{ php_ver }}-xml
+  - php{{ php_ver }}-mbstring
+  - php{{ php_ver }}-curl
+  - php{{ php_ver }}-zip
+  - php{{ php_ver }}-gd
+  - php{{ php_ver }}-intl
+  - php{{ php_ver }}-soap
+  - php{{ php_ver }}-bcmath
+  - php{{ php_ver }}-redis

@@ -1,0 +1,33 @@
+---
+- name: Instalar Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Eliminar la configuración default de Nginx
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reiniciar Nginx
+
+- name: Crear directorio de logs de Nginx
+  file:
+    path: /var/log/nginx/{{ nginx_server_name }}.access.log
+    state: touch
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+  when: nginx_server_name is defined
+  notify: Crear directorio de logs de Nginx
+
+- name: Crear la configuración de Nginx para Moodle
+  template:
+    src: templates/nginx_moodle.conf.j2
+    dest: /etc/nginx/sites-available/moodle
+  notify: Habilitar sitio de Nginx
+
+- name: Habilitar sitio de Nginx
+  file:
+    src: /etc/nginx/sites-available/moodle
+    dest: /etc/nginx/sites-enabled/moodle
+    state: link
+  notify: Reiniciar Nginx

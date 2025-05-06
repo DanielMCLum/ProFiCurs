@@ -1,0 +1,7 @@
+---
+- name: Cambiar propiedad del directorio de Moodle
+  file:
+    path: "{{ moodle_install_dir }}"
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+    recurse: yes

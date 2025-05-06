@@ -1,0 +1,5 @@
+---
+- name: Reiniciar PHP-FPM
+  service:
+    name: php{{ php_ver }}-fpm
+    state: restarted

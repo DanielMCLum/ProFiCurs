@@ -1,0 +1,47 @@
+---
+- name: Crear directorio de instalación de Moodle
+  file:
+    path: "{{ moodle_install_dir }}"
+    state: directory
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+    mode: '0755'
+
+- name: Crear directorio de datos de Moodle
+  file:
+    path: "{{ moodle_datadir }}"
+    state: directory
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+    mode: '0777'
+
+- name: Descargar Moodle
+  get_url:
+    url: "{{ moodle_download_url }}"
+    dest: /tmp/moodle.tar.gz
+
+- name: Descomprimir Moodle
+  command: tar -xzf /tmp/moodle.tar.gz -C /tmp/
+  args:
+    creates: /tmp/moodle
+
+- name: Copiar archivos de Moodle al directorio de instalación
+  command: rsync -av /tmp/moodle/ "{{ moodle_install_dir }}"
+  notify: Cambiar propiedad del directorio de Moodle
+
+- name: Cambiar propiedad del directorio de Moodle
+  file:
+    path: "{{ moodle_install_dir }}"
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+    recurse: yes
+
+- name: Eliminar archivo de instalación de Moodle
+  file:
+    path: /tmp/moodle.tar.gz
+    state: absent
+
+- name: Eliminar directorio temporal de Moodle
+  file:
+    path: /tmp/moodle
+    state: absent

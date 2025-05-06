@@ -1,0 +1,13 @@
+---
+- name: Actualizar caché de apt
+  apt:
+    update_cache: yes
+
+- name: Asegurar que los paquetes esenciales estén instalados
+  apt:
+    name:
+      - curl
+      - wget
+      - git
+      - software-properties-common
+    state: present

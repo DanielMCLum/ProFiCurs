@@ -1,0 +1,20 @@
+---
+- name: Reiniciar Nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: Crear directorio de logs de Nginx
+  file:
+    path: /var/log/nginx/{{ nginx_server_name }}.access.log
+    state: touch
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
+  when: nginx_server_name is defined
+
+- name: Habilitar sitio de Nginx
+  file:
+    src: /etc/nginx/sites-available/moodle
+    dest: /etc/nginx/sites-enabled/moodle
+    state: link
+  notify: Reiniciar Nginx
