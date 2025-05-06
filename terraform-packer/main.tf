@@ -5,7 +5,7 @@
 # 1. Grupo de recursos
 resource "azurerm_resource_group" "wp" {
   name     = "wordpress-student-rg"
-  location = "eastus"  # Región con más beneficios gratuitos
+  location = "westeurope"  # Europa Occidental (generalmente más estable)
 }
 
 # 2. App Service Plan (GRATIS con límites)
