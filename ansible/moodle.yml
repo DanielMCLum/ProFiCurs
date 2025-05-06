@@ -1,13 +1,4 @@
 ---
-- name: Leer outputs de Terraform
-  slurp:
-    src: ../terraform_output.json
-  register: terraform_output_json
-
-- name: Establecer fact de Terraform
-  set_fact:
-    terraform: "{{ terraform_output_json.content | b64decode | from_json }}"
-
 - name: Configurar servidor web para Moodle
   hosts: moodle_instance
   become: true
@@ -38,6 +29,15 @@
       - php{{ php_ver }}-redis
 
   tasks:
+    - name: Leer outputs de Terraform
+      slurp:
+        src: ../terraform_output.json
+      register: terraform_output_json
+
+    - name: Establecer fact de Terraform
+      set_fact:
+        terraform: "{{ terraform_output_json.content | b64decode | from_json }}"
+
     - name: Actualizar
       become: true
       apt:

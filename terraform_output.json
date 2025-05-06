@@ -2,7 +2,7 @@
   "moodle_instance_public_ip": {
     "sensitive": false,
     "type": "string",
-    "value": "44.204.243.152"
+    "value": "3.91.19.242"
   },
   "rds_endpoint": {
     "sensitive": false,
