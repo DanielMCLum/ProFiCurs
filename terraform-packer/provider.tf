@@ -4,4 +4,5 @@ provider "azurerm" {
   client_id       = "bf55d652-be5e-4cbd-94f6-05faecbbb6a7"    # appId del SP
   client_secret   = "WDa8Q~0MTuNX0zfasaDqR5hPYE68PwLUu3dCzbbl" # password del SP
   tenant_id       = "836f1d43-90b9-41eb-815f-6e37bd65ff30" # tenant del SP
+  use_cli         = true  # Fuerza el uso de la CLI autenticada
 }
