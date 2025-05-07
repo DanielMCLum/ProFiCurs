@@ -39,7 +39,7 @@
     enabled: yes
 
 - name: Plantilla de configuración Nginx con PHP dinámico
-  copy:
+  template:
     src: templates/default.conf.j2
     dest: /etc/nginx/sites-available/default
     owner: root

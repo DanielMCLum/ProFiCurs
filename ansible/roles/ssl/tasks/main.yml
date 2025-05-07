@@ -1,0 +1,21 @@
+- name: Instalar Certbot y plugin para Nginx
+  apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+    update_cache: yes
+
+- name: Obtener certificado SSL con Certbot
+  command: >
+    certbot --nginx --non-interactive --agree-tos
+    --redirect
+    --email {{ ssl_email }}
+    -d {{ domain_name }}
+  register: certbot_result
+  notify: Recargar Nginx
+  when: domain_name is defined and ssl_email is defined
+
+- name: Verificar que Certbot ha instalado el certificado
+  debug:
+    var: certbot_result.stdout_lines
