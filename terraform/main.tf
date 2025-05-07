@@ -65,14 +65,15 @@ resource "aws_instance" "wordpress" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "wordpress-server"
+    Name = "Wordpress-Server"
   }
 }
 
 # Elastic IP
 resource "aws_eip" "wp_eip" {
-  vpc = true
+  domain = "vpc"
 }
+
 
 # Asociación de EIP con la instancia (por separado)
 resource "aws_eip_association" "eip_assoc" {
