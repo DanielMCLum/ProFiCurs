@@ -71,7 +71,13 @@ resource "aws_instance" "wordpress" {
 
 # Elastic IP
 resource "aws_eip" "wp_eip" {
-  instance = aws_instance.wordpress.id
-  domain = "vpc"
+  vpc = true
 }
+
+# Asociación de EIP con la instancia (por separado)
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.wordpress.id
+  allocation_id = aws_eip.wp_eip.id
+}
+
 
