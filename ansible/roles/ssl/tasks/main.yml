@@ -9,7 +9,7 @@
 - name: Obtener certificado SSL de Let's Encrypt para el dominio
   community.general.certbot:
     domains:
-      - ["{{ domain_name }}"]
+      - "{{ domain_name }}"
     authenticator: nginx
     installer: nginx
     email: "{{ ssl_email }}"
@@ -37,4 +37,3 @@
   debug:
     var: certbot_certificates.stdout_lines
   when: certbot_installed.stat.exists
-
