@@ -1,6 +1,6 @@
 [moodle_instance]
-{{ moodle_instance_public_ip.value }}
+34.234.215.97
 
 [moodle_instance:vars]
 ansible_user=ubuntu
-ansible_private_key_file=../Vokey.pem
+ansible_private_key_file=Vokey.pem

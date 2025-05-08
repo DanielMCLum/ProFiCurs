@@ -1,4 +1,9 @@
 ---
+- name: Configurar playbook con los outputs de terraform
+  hosts: localhost
+  roles:
+    - terraform_setup
+
 - name: Configurar servidor web para Moodle
   hosts: moodle_instance
   become: true
@@ -10,7 +15,6 @@
     database_user: admin
     database_password: "Pirineus123$"
   roles:
-    - terraform_setup
     - common
     - webserver
     - php

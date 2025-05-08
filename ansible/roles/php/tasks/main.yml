@@ -22,8 +22,6 @@
   template:
     src: templates/php_fpm_pool.conf.j2
     dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
-  vars:
-    php_fpm_user: "{{ php_fpm_user }}"
   notify: Reiniciar PHP-FPM
 
 - name: Asegurar la propiedad del directorio del socket de PHP-FPM
@@ -32,3 +30,10 @@
     owner: "{{ php_fpm_user }}"
     group: "{{ php_fpm_user }}"
     recurse: yes
+
+- name: Asegurar la propiedad del socket de PHP-FPM a www-data
+  file:
+    path: /run/php/php8.3-fpm.sock
+    owner: www-data
+    group: www-data
+  become: true

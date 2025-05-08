@@ -2,6 +2,11 @@
   "moodle_instance_public_ip": {
     "sensitive": false,
     "type": "string",
-    "value": "44.193.29.55"
+    "value": "34.234.215.97"
+  },
+  "rds_endpoint": {
+    "sensitive": false,
+    "type": "string",
+    "value": "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306"
   }
 }

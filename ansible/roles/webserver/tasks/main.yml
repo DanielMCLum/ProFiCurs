@@ -6,7 +6,9 @@
 
 - name: Eliminar la configuración default de Nginx
   file:
-    path: /etc/nginx/sites-enabled/default
+    path: 
+      - /etc/nginx/sites-enabled/default
+      - /etc/nginx/sites-available/default
     state: absent
   notify: Reiniciar Nginx
 

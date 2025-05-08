@@ -8,11 +8,11 @@ output "rds_endpoint" {
     description = "El endpoint de la instancia RDS de Moodle"
 }
 
-resource "null_resource" "output_to_json" {
+/*resource "null_resource" "output_to_json" {
     depends_on = [
         aws_db_instance.moodledb,
     ]
     provisioner "local-exec" {
         command = "bash terraform_output.sh"
     }
-}
+}*/
