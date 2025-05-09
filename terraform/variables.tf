@@ -9,3 +9,8 @@ variable "instance_type" {
 variable "ami_id" {
   default = "ami-053b0d53c279acc90" # Ubuntu 22.04 en us-east-1
 }
+
+variable "acm_certificate_arn" {
+  description = "ARN del certificado SSL de ACM para el ALB"
+  type        = string
+}
