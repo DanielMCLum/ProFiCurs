@@ -1,39 +1,28 @@
-- name: Asegurarse de que Certbot y plugin de Nginx están instalados
+- name: Instalar Certbot y plugin para webroot
   apt:
     name:
       - certbot
-      - python3-certbot-nginx
     state: present
     update_cache: yes
 
-- name: Obtener certificado SSL de Let's Encrypt para el dominio
-  community.general.certbot:
-    domains:
-      - "{{ domain_name }}"
-    authenticator: nginx
-    installer: nginx
-    email: "{{ ssl_email }}"
-    agree_tos: true
-    redirect: true
-    register_unsafely_without_email: false
-    keep_until_expiring: true
-    force: false
+- name: Asegurar directorio challenge webroot
+  file:
+    path: /var/www/html/.well-known/acme-challenge
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Obtener certificado SSL con Certbot usando webroot
+  command: >
+    certbot certonly --webroot --webroot-path=/var/www/html
+    --non-interactive --agree-tos
+    --email {{ ssl_email }}
+    -d {{ domain_name }}
+  register: certbot_result
   notify: Recargar Nginx
   when: domain_name is defined and ssl_email is defined
 
-
-- name: Verificar si certbot está instalado
-  stat:
-    path: /usr/bin/certbot
-  register: certbot_installed
-
-- name: Mostrar certificados SSL instalados por Certbot
-  command: certbot certificates
-  register: certbot_certificates
-  changed_when: false
-  when: certbot_installed.stat.exists
-
-- name: Salida de certificados instalados
+- name: Verificar que Certbot ha instalado el certificado
   debug:
-    var: certbot_certificates.stdout_lines
-  when: certbot_installed.stat.exists
+    var: certbot_result.stdout_lines
