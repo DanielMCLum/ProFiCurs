@@ -4,14 +4,6 @@
     name: nginx
     state: present
 
-- name: Eliminar la configuración default de Nginx
-  file:
-    path: 
-      - /etc/nginx/sites-enabled/default
-      - /etc/nginx/sites-available/default
-    state: absent
-  notify: Reiniciar Nginx
-
 - name: Crear directorio de logs de Nginx
   file:
     path: /var/log/nginx/{{ nginx_server_name }}.access.log
@@ -33,3 +25,10 @@
     dest: /etc/nginx/sites-enabled/moodle
     state: link
   notify: Reiniciar Nginx
+
+- name: Eliminar la configuración default de Nginx
+  file:
+    path: 
+      - /etc/nginx/sites-enabled/default
+      - /etc/nginx/sites-available/default
+    state: absent

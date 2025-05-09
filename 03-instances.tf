@@ -11,6 +11,18 @@ resource "aws_instance" "moodle" {
     }
 }
 
+# Elastic IP
+# Busca una Elastic IP existente (por su dirección IP)
+#data "aws_eip" "existing" {
+#  public_ip = "44.236.152.59"
+#}
+
+# Asociación de EIP con la instancia (por separado)
+#resource "aws_eip_association" "eip_assoc" {
+#  instance_id   = aws_instance.moodle.id
+#  allocation_id = "eipalloc-0ab85e51272c9c47b"
+#}
+
 # Define una configuración de inicio para las instancias EC2 de moodle
 /*resource "aws_launch_template" "moodle_lt" {
     name_prefix   = "moodle_lt"
@@ -32,9 +44,9 @@ resource "aws_autoscaling_group" "moodle_asg" {
         version = "$Latest"
     }
     vpc_zone_identifier = [aws_subnet.public1_moodle.id, aws_subnet.public2_moodle.id]
-    desired_capacity   = 1
-    min_size           = 1
-    max_size           = 1
+    desired_capacity   = 2
+    min_size           = 2
+    max_size           = 4
     health_check_type = "EC2"
 }
 

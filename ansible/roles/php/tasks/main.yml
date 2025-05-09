@@ -24,6 +24,15 @@
     dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
   notify: Reiniciar PHP-FPM
 
+- name: Establecer max_input_vars en PHP
+  ini_file:
+    path: /etc/php/{{ php_ver }}/fpm/php.ini
+    section: PHP
+    option: max_input_vars
+    value: '5000'
+    no_extra_spaces: yes
+  notify: Reiniciar PHP-FPM
+
 - name: Asegurar la propiedad del directorio del socket de PHP-FPM
   file:
     path: /run/php/
@@ -34,6 +43,6 @@
 - name: Asegurar la propiedad del socket de PHP-FPM a www-data
   file:
     path: /run/php/php8.3-fpm.sock
-    owner: www-data
-    group: www-data
+    owner: "{{ php_fpm_user }}"
+    group: "{{ php_fpm_user }}"
   become: true

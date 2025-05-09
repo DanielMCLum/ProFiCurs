@@ -1,5 +1,5 @@
 [moodle_instance]
-34.234.215.97
+44.204.225.36
 
 [moodle_instance:vars]
 ansible_user=ubuntu

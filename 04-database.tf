@@ -1,6 +1,6 @@
 resource "aws_db_instance" "moodledb" {
     engine                      = "mysql"
-    engine_version              = "8.0"
+    engine_version              = "8.4.3"
     skip_final_snapshot         = true
     //multi_az                    = true
     final_snapshot_identifier   = "my-final-snapshot"
