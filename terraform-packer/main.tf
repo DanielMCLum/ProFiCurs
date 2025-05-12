@@ -1,23 +1,32 @@
-# Configuración principal de WordPress en Azure (para estudiantes)
-# Archivo: main.tf
+# ==========================================================
+# 🚀 Configuración de WordPress en Azure (para estudiantes)
+# ==========================================================
+# Este código despliega una instancia de WordPress en Azure
+# utilizando Terraform, con un enfoque en costos reducidos.
+# ==========================================================
 
-
-# 1. Grupo de recursos
+# 1️⃣ Grupo de recursos
+# ---------------------
+# Define el grupo de recursos donde se alojarán todos los servicios.
 resource "azurerm_resource_group" "wp" {
   name     = "wordpress-student-rg"
-  location = "westeurope"  # Europa Occidental (generalmente más estable)
+  location = "westeurope"  # Región recomendada por estabilidad
 }
 
-# 2. App Service Plan (GRATIS con límites)
+# 2️⃣ App Service Plan (Gratis)
+# -----------------------------
+# Se usa el plan F1 gratuito, con límites de CPU (60 min/día).
 resource "azurerm_service_plan" "wp" {
   name                = "wordpress-free-plan"
   location            = azurerm_resource_group.wp.location
   resource_group_name = azurerm_resource_group.wp.name
   os_type             = "Linux"
-  sku_name            = "F1"  # Plan gratuito (60 mins CPU/día)
+  sku_name            = "F1"  # Plan gratuito
 }
 
-# 3. App Service para WordPress
+# 3️⃣ Aplicación Web (WordPress)
+# ------------------------------
+# Se despliega la aplicación web con PHP 8.2 y configuración optimizada.
 resource "azurerm_linux_web_app" "wp" {
   name                = "wordpress-app-${random_string.suffix.result}"
   location            = azurerm_resource_group.wp.location
@@ -26,7 +35,7 @@ resource "azurerm_linux_web_app" "wp" {
 
   site_config {
     application_stack {
-      php_version = "8.2"  # Versión PHP para WordPress
+      php_version = "8.2"  # Versión PHP recomendada para WordPress
     }
     always_on = false  # Necesario para plan F1 gratis
   }
@@ -36,7 +45,7 @@ resource "azurerm_linux_web_app" "wp" {
     "WORDPRESS_DB_HOST"                   = azurerm_mysql_flexible_server.wp.fqdn
     "WORDPRESS_DB_USER"                   = azurerm_mysql_flexible_server.wp.administrator_login
     "WORDPRESS_DB_PASSWORD"               = var.mysql_admin_password
-    "WEBSITES_CONTAINER_START_TIME_LIMIT" = "600"  # Tiempo extra para instalar WP
+    "WEBSITES_CONTAINER_START_TIME_LIMIT" = "600"  # Tiempo extra para instalación
   }
 
   lifecycle {
@@ -46,30 +55,33 @@ resource "azurerm_linux_web_app" "wp" {
   }
 }
 
-# 4. Base de datos MySQL (SKU más económica)
+# 4️⃣ Base de datos MySQL
+# -----------------------
+# Se usa Azure Flexible Server con una SKU económica.
 resource "azurerm_mysql_flexible_server" "wp" {
   name                = "wordpress-db-${random_string.suffix.result}" # Nombre único
   location            = azurerm_resource_group.wp.location
   resource_group_name = azurerm_resource_group.wp.name
   
-  # SKU económica verificada para estudiantes
   sku_name   = "B_Standard_B1ms"  # Burstable con 1 vCore y 2GB RAM
   version    = "8.0.21"
   
   storage {
-    size_gb           = 20  # Mínimo requerido ahora
+    size_gb           = 20  # Mínimo requerido
     auto_grow_enabled = false # Para controlar costos
     iops              = 360 # Mínimo para 20GB
   }
 
-  administrator_login          = "wpadmin"
-  administrator_password       = var.mysql_admin_password
+  administrator_login    = "wpadmin"
+  administrator_password = var.mysql_admin_password
   
-  backup_retention_days        = 1  # Mínimo permitido para ahorrar
+  backup_retention_days        = 1  # Mínimo permitido
   geo_redundant_backup_enabled = false
 }
   
-# 5. Base de datos WordPress
+# 5️⃣ Base de datos WordPress
+# ---------------------------
+# Se crea la base de datos con configuración UTF-8.
 resource "azurerm_mysql_flexible_database" "wp" {
   name                = "wordpress"
   resource_group_name = azurerm_resource_group.wp.name
@@ -78,14 +90,18 @@ resource "azurerm_mysql_flexible_database" "wp" {
   collation           = "utf8mb4_unicode_ci"
 }
 
-# 6. Sufijo aleatorio para nombres únicos
+# 6️⃣ Sufijo aleatorio
+# --------------------
+# Se genera un sufijo aleatorio para nombres únicos.
 resource "random_string" "suffix" {
   length  = 6
   special = false
   upper   = false
 }
 
-# 7. Reglas de firewall para MySQL (permite conexiones desde App Service)
+# 7️⃣ Reglas de firewall
+# ----------------------
+# Se permite el acceso desde servicios de Azure.
 resource "azurerm_mysql_flexible_server_firewall_rule" "azure_services" {
   name                = "allow-azure-services"
   resource_group_name = azurerm_resource_group.wp.name
