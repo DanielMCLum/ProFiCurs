@@ -9,3 +9,14 @@
 
 # Ignorar la clave publica
 *.pem
+
+# 🚫 Ignorar archivos sensibles
+terraform.tfvars
+.env
+credentials.json
+
+# 🚫 Ignorar archivos generados automáticamente
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
