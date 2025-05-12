@@ -10,27 +10,24 @@
     name: "{{ php_extensions }}"
     state: present
 
-- name: Configurar PHP-FPM (ajusta según tus necesidades)
-  ini_file:
-    path: /etc/php/{{ php_ver }}/fpm/php.ini
-    section: PHP
-    option: max_execution_time
-    value: 300
+- name: Modificar php.ini para ajustar configuraciones de PHP
+  lineinfile:
+    path: "/etc/php/{{ php_ver }}/fpm/php.ini"
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }} = {{ item.value }}"
+    state: present
+  loop:
+    - { key: "memory_limit", value: "1024M" }
+    - { key: "max_input_vars", value: "9999" }
+    - { key: "max_execution_time", value: "600" }
+    - { key: "upload_max_filesize", value: "512M" }
+    - { key: "post_max_size", value: "256M" }
   notify: Reiniciar PHP-FPM
 
 - name: Configurar pool de PHP-FPM
   template:
     src: templates/php_fpm_pool.conf.j2
     dest: /etc/php/{{ php_ver }}/fpm/pool.d/www.conf
-  notify: Reiniciar PHP-FPM
-
-- name: Establecer max_input_vars en PHP
-  ini_file:
-    path: /etc/php/{{ php_ver }}/fpm/php.ini
-    section: PHP
-    option: max_input_vars
-    value: '5000'
-    no_extra_spaces: yes
   notify: Reiniciar PHP-FPM
 
 - name: Asegurar la propiedad del directorio del socket de PHP-FPM
@@ -42,7 +39,7 @@
 
 - name: Asegurar la propiedad del socket de PHP-FPM a www-data
   file:
-    path: /run/php/php8.3-fpm.sock
+    path: /run/php/php{{ php_ver }}-fpm.sock
     owner: "{{ php_fpm_user }}"
     group: "{{ php_fpm_user }}"
   become: true

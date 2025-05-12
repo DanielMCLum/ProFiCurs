@@ -1,6 +1,6 @@
 resource "aws_instance" "moodle" {
     ami                         = "ami-084568db4383264d4"
-    instance_type               = "t2.micro"
+    instance_type               = "t3.micro"
     key_name                    = "Vokey"
     subnet_id                   = aws_subnet.public1_moodle.id
     iam_instance_profile        = "LabInstanceProfile" 

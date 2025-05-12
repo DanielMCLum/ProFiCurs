@@ -16,6 +16,6 @@
     database_password: "Pirineus123$"
   roles:
     - common
-    - webserver
     - php
+    - webserver
     - moodle
