@@ -98,6 +98,7 @@ Para obtener la IP pública de la VM, ejecuta:
 
 sh
 terraform output vm_public_ip
+
 🏗️ Creación de imagen con Packer
 Configuración del builder
 Se usa Packer para crear una imagen de máquina virtual con WordPress preinstalado.
@@ -160,12 +161,14 @@ sh
 terraform init
 terraform plan
 terraform apply -auto-approve
+
 Packer
 Para construir la imagen de máquina virtual:
 
 sh
 packer init .
 packer build .
+
 🔐 Seguridad y buenas prácticas
 ✅ No exponer credenciales en variables.tf o packer.pkr.hcl → Usa terraform.tfvars y packer.auto.pkrvars.hcl. ✅ Añadir terraform.tfvars y packer.auto.pkrvars.hcl a .gitignore → Evita que se suban al repositorio. ✅ Usar variables en lugar de valores fijos → Evita riesgos de seguridad.
 
