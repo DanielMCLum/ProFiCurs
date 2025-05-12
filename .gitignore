@@ -25,3 +25,8 @@ credentials.json
 Azurequantum.tf.bak
 *.bak
 *.disabled.tf
+
+# 🚫 Ignorar archivos sensibles
+packer.auto.pkrvars.hcl
+*.pkrvars.hcl
+
