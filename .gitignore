@@ -20,3 +20,8 @@ credentials.json
 *.tfstate.backup
 .terraform/
 .terraform.lock.hcl
+
+# 🚫 Ignorar archivos de respaldo
+Azurequantum.tf.bak
+*.bak
+*.disabled.tf
