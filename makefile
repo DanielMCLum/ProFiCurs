@@ -1,6 +1,7 @@
 # Variables
 TF_DIR=terraform
 ANSIBLE_DIR=ansible
+
 KEY_PATH=$(TF_DIR)/devops.pem
 
 # Variables dinámicas
