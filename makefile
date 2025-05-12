@@ -2,33 +2,56 @@
 TF_DIR=terraform
 ANSIBLE_DIR=ansible
 KEY_PATH=$(TF_DIR)/devops.pem
-INVENTORY=$(ANSIBLE_DIR)/inventory.ini
 
-.PHONY: all apply destroy plan inventory ansible
+# Variables dinámicas
+INVENTORY_FILE=$(ANSIBLE_DIR)/inventory.ini
 
-## apply: Aplica Terraform, genera inventario y ejecuta Ansible
-apply: terraform apply inventory ansible
+.PHONY: all init apply destroy ansible inventory output plan validate
 
-## terraform: Ejecuta terraform init y apply
-terraform:
-	cd $(TF_DIR) && terraform init && terraform apply -auto-approve
+# Ejecuta todo el flujo: init, apply, inventario, ansible
+all: init apply inventory ansible
 
-## destroy: Destruye toda la infraestructura
-destroy:
-	cd $(TF_DIR) && terraform destroy -auto-approve
+# Inicializa Terraform
+init:
+	terraform -chdir=$(TF_DIR) init
 
-## inventory: Genera archivo de inventario Ansible desde Terraform output
-inventory:
-	@echo "🔍 Generando archivo de inventario..."
-	@IP=$$(cd $(TF_DIR) && terraform output -raw wordpress_public_ip); \
-	echo "[wordpress]" > $(INVENTORY); \
-	echo "$$IP ansible_user=ubuntu ansible_ssh_private_key_file=$(KEY_PATH)" >> $(INVENTORY); \
-	echo "✅ Inventory generado con IP: $$IP"
+# Aplica la infraestructura con Terraform
+apply:
+	terraform -chdir=$(TF_DIR) apply -auto-approve
 
-## ansible: Ejecuta el playbook de Ansible
-ansible:
-	ansible-playbook -i $(INVENTORY) $(ANSIBLE_DIR)/playbook.yml
+# Valida sintaxis y lógica del código Terraform
+validate:
+	terraform -chdir=$(TF_DIR) validate
 
-## plan: Muestra un plan de Terraform
+# Muestra el plan de cambios de Terraform
 plan:
-	cd $(TF_DIR) && terraform plan
+	terraform -chdir=$(TF_DIR) plan
+
+# Ejecuta destroy de toda la infraestructura
+destroy:
+	terraform -chdir=$(TF_DIR) destroy -auto-approve
+
+# Genera el inventario dinámico desde Terraform para Ansible
+inventory:
+	@echo "Actualizando inventario Ansible..."
+	@./generate_inventory.sh
+
+# Ejecuta Ansible sobre las instancias creadas
+ansible:
+	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(INVENTORY_FILE) $(ANSIBLE_DIR)/playbook.yml
+
+# Muestra las salidas definidas en outputs.tf
+output:
+	terraform -chdir=$(TF_DIR) output
+
+
+help:
+	@echo "Comandos disponibles:"
+	@echo ""
+	@echo "  make init       - Inicializa Terraform en el directorio ./terraform"
+	@echo "  make apply      - Aplica la infraestructura con Terraform"
+	@echo "  make inventory  - Genera el inventario dinámico para Ansible"
+	@echo "  make ansible    - Ejecuta Ansible usando el inventario generado"
+	@echo "  make destroy    - Elimina toda la infraestructura provisionada"
+	@echo "  make all        - Ejecuta init, apply, inventory y ansible en orden"
+	@echo "  make help       - Muestra esta ayuda"

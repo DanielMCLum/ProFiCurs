@@ -9,3 +9,6 @@
 
 # Ignorar la clave publica
 *.pem
+
+# Ignorar otros tipos de configuración de vscode
+*.vscode
