@@ -1,0 +1,5 @@
+client_id       = "af0954fb-f306-467c-861f-1911497a71aa"
+client_secret   = "BS_8Q~nZ1vGDsnGagu2H5MqKUoLW1ZSsOTUi_bm~"
+subscription_id = "9c83b4e6-cccc-4027-b0b1-3c6ff5807320"
+tenant_id       = "836f1d43-90b9-41eb-815f-6e37bd65ff30"
+db_password     = "MiContraseñaSegura123!"
