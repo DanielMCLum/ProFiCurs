@@ -1,4 +1,4 @@
-# ProFiCursb
+# ProFiCurs
 # Terraform: Despliegue de Infraestructura AWS para WordPress y Ansible  
 
 Este repositorio contiene código Terraform para desplegar una infraestructura básica en AWS que incluye:  
