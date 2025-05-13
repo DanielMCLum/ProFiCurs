@@ -2,6 +2,10 @@
 La declaración variable "region" en Terraform define una variable configurable con un valor predeterminado para especificar la región de AWS donde se desplegarán los recursos.
 
 
+variable "region" {
+  default = "us-east-1"
+}
+
 Qué hace exactamente:
 Define una variable llamada "region":
 
@@ -52,6 +56,3 @@ Necesitas desplegar en múltiples regiones (usando módulos)
 Colaboras con otros que prefieren regiones diferentes
 
 
-variable "region" {
-  default = "us-east-1"
-}
