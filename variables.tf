@@ -52,7 +52,6 @@ Necesitas desplegar en múltiples regiones (usando módulos)
 Colaboras con otros que prefieren regiones diferentes
 
 
-
 variable "region" {
   default = "us-east-1"
 }
