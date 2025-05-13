@@ -3,3 +3,5 @@
   service:
     name: php{{ php_ver }}-fpm
     state: restarted
+  listen: "php: Reiniciar PHP-FPM"
+  when: reiniciar_php is defined and reiniciar_php
