@@ -1,3 +1,22 @@
+Este código de Terraform despliega una infraestructura básica en AWS para gestionar un entorno de WordPress con Ansible. La configuración hace lo siguiente:
+
+1. **Configura el proveedor AWS** en la región us-east-1 (Norte de Virginia).
+
+2. **Crea un Security Group** llamado "wordpress_sg" que:
+   - Permite conexiones SSH (puerto 22) desde cualquier dirección IP (0.0.0.0/0)
+   - Permite tráfico HTTP (puerto 80) para acceder a WordPress
+   - Autoriza todo el tráfico saliente (egress)
+
+3. **Despliega dos instancias EC2**:
+   - **ansible_host**: Una instancia t2.micro con Amazon Linux 2 que:
+     * Tiene asociada la clave SSH "AWS-Samuel"
+     * Usa el security group creado anteriormente
+     * Instala automáticamente Ansible mediante user_data al iniciarse
+   - **wordpress_host**: Otra instancia t2.micro idéntica pero sin la instalación de Ansible, destinada a alojar WordPress
+
+Ambas instancias comparten la misma AMI (ami-0c02fb55956c7d316) y tipo de instancia (t2.micro), y están etiquetadas con nombres descriptivos ("Ansible Host" y "WordPress Host").
+
+Esta configuración proporciona la base para luego usar Ansible (desde ansible_host) para configurar automáticamente WordPress en wordpress_host, aprovechando que ambas instancias comparten el mismo security group que permite el tráfico necesario.
 
 provider "aws" {
   region = "us-east-1"
