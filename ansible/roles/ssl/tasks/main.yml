@@ -1,28 +1,7 @@
-- name: Instalar Certbot y plugin para webroot
-  apt:
-    name:
-      - certbot
-    state: present
-    update_cache: yes
-
-- name: Asegurar directorio challenge webroot
+- name: Asegurar directorio raíz para WordPress
   file:
-    path: /var/www/html/.well-known/acme-challenge
+    path: /var/www/html
     state: directory
     owner: www-data
     group: www-data
     mode: '0755'
-
-- name: Obtener certificado SSL con Certbot usando webroot
-  command: >
-    certbot certonly --webroot --webroot-path=/var/www/html
-    --non-interactive --agree-tos
-    --email {{ ssl_email }}
-    -d {{ domain_name }}
-  register: certbot_result
-  notify: Recargar Nginx
-  when: domain_name is defined and ssl_email is defined
-
-- name: Verificar que Certbot ha instalado el certificado
-  debug:
-    var: certbot_result.stdout_lines

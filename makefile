@@ -10,7 +10,7 @@ INVENTORY_FILE=$(ANSIBLE_DIR)/inventory.ini
 .PHONY: all init apply destroy ansible inventory output plan validate
 
 # Ejecuta todo el flujo: init, apply, inventario, ansible
-all: init apply inventory ansible
+all: apply inventory ansible
 
 # Inicializa Terraform
 init:

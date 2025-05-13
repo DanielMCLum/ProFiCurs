@@ -11,7 +11,7 @@ echo "[web]" > "$INVENTORY_FILE"
 
 # Escribir cada IP en el archivo inventory.ini
 for ip in $IP_LIST; do
-  echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=../terraform/devops.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'" >> "$INVENTORY_FILE"
+  echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=terraform/devops.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'" >> "$INVENTORY_FILE"
 done
 
 echo "✅ Inventario Ansible actualizado en: $INVENTORY_FILE"
