@@ -14,6 +14,8 @@
     name:
       - curl
       - unzip
+      - php-mysql
+      - php-curl
     state: present
 
 - name: Descargar WordPress
@@ -58,35 +60,50 @@
     mode: '0644'
   notify: Recargar Nginx
 
-- name: Comprobar si WordPress ya está instalado (wp-config.php + base de datos)
-  stat:
-    path: /var/www/html/wp-config.php
-  register: wp_installed
+# Instalar WP-CLI
+- name: Descargar WP-CLI
+  get_url:
+    url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    dest: /usr/local/bin/wp-cli.phar
+    mode: '0755'
 
-- name: Instalar WordPress con WP-CLI si no está instalado
+- name: Mover WP-CLI a /usr/local/bin/wp
+  copy:
+    src: /usr/local/bin/wp-cli.phar
+    dest: /usr/local/bin/wp
+    remote_src: yes
+    mode: '0755'
+
+# Ejecutar instalación de WordPress si aún no se ha hecho
+- name: Verificar si WordPress ya está instalado
+  command: wp core is-installed --allow-root
+  args:
+    chdir: /var/www/html
+  register: wp_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Instalar WordPress si no está instalado
   command: >
     wp core install
     --url=https://{{ domain_name }}
-    --title="{{ wp_site_title }}"
-    --admin_user={{ wp_admin_user }}
-    --admin_password={{ wp_admin_password }}
-    --admin_email={{ wp_admin_email }}
-    --skip-email
+    --title="Mi Sitio WordPress"
+    --admin_user=admin
+    --admin_password=admin12345
+    --admin_email=admin@{{ domain_name }}
     --allow-root
   args:
     chdir: /var/www/html
-  become: yes
-  when: not wp_installed.stat.exists
+  when: wp_installed.rc != 0
 
 - name: Forzar HTTPS en siteurl
   command: wp option update siteurl https://{{ domain_name }} --allow-root
   args:
     chdir: /var/www/html
-  become: yes
+  when: wp_installed.rc == 0
 
 - name: Forzar HTTPS en home
   command: wp option update home https://{{ domain_name }} --allow-root
   args:
     chdir: /var/www/html
-  become: yes
-
+  when: wp_installed.rc == 0

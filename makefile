@@ -10,7 +10,7 @@ INVENTORY_FILE=$(ANSIBLE_DIR)/inventory.ini
 .PHONY: all init apply destroy ansible inventory output plan validate
 
 # Ejecuta todo el flujo: init, apply, inventario, ansible
-all: apply inventory ansible
+all: init apply inventory ansible
 
 # Inicializa Terraform
 init:
@@ -40,6 +40,12 @@ inventory:
 # Ejecuta Ansible sobre las instancias creadas
 ansible:
 	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(INVENTORY_FILE) $(ANSIBLE_DIR)/playbook.yml
+
+deploy: ## Ejecuta apply + inventory + ansible (sin init)
+	$(MAKE) apply
+	$(MAKE) inventory
+	$(MAKE) ansible
+	
 
 # Muestra las salidas definidas en outputs.tf
 output:
