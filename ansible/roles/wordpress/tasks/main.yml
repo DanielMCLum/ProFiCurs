@@ -5,8 +5,35 @@
       - domain_name is defined
       - domain_name | length > 0
     fail_msg: >
-      ❌ La variable 'domain_name' no está definida o está vacía. 
+      ❌ La variable 'domain_name' no está definida o está vacía.
       Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
+
+# -----------------------------
+# SOPORTE EFS: NFS y montaje
+# -----------------------------
+
+- name: Instalar soporte para NFS (requerido por EFS)
+  apt:
+    name: nfs-common
+    state: present
+
+- name: Asegurar que /var/www/html existe
+  file:
+    path: /var/www/html
+    state: directory
+    mode: '0755'
+
+- name: Montar EFS en /var/www/html
+  mount:
+    path: /var/www/html
+    src: "{{ efs_dns }}"
+    fstype: nfs4
+    opts: "nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
+    state: mounted
+
+# -----------------------------
+# INSTALACIÓN WORDPRESS
+# -----------------------------
 
 - name: Obtener claves SALT únicas
   uri:
@@ -69,7 +96,10 @@
     mode: '0644'
   notify: Recargar Nginx
 
-# Instalar WP-CLI
+# -----------------------------
+# WP-CLI opcional (Para reutlizar si se desea)
+# -----------------------------
+
 - name: Descargar WP-CLI
   get_url:
     url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -83,36 +113,3 @@
     remote_src: yes
     mode: '0755'
 
-# Ejecutar instalación de WordPress si aún no se ha hecho
-- name: Verificar si WordPress ya está instalado
-  command: wp core is-installed --allow-root
-  args:
-    chdir: /var/www/html
-  register: wp_installed
-  ignore_errors: true
-  changed_when: false
-
-- name: Instalar WordPress si no está instalado
-  command: >
-    wp core install
-    --url=https://{{ domain_name }}
-    --title="Mi Sitio WordPress"
-    --admin_user=admin
-    --admin_password=admin12345
-    --admin_email=admin@{{ domain_name }}
-    --allow-root
-  args:
-    chdir: /var/www/html
-  when: wp_installed.rc != 0
-
-- name: Forzar HTTPS en siteurl
-  command: wp option update siteurl https://{{ domain_name }} --allow-root
-  args:
-    chdir: /var/www/html
-  when: wp_installed.rc == 0
-
-- name: Forzar HTTPS en home
-  command: wp option update home https://{{ domain_name }} --allow-root
-  args:
-    chdir: /var/www/html
-  when: wp_installed.rc == 0

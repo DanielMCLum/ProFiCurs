@@ -6,30 +6,19 @@ define( 'DB_HOST', 'localhost' );
 define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
-
-# Inyección de las claves SALT descargadas
 {{ wp_salts }}
 
-# Prefijo de las tablas en la base de datos
 $table_prefix = 'wp_';
 
-# Activar/desactivar modo depuración
+if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' ) {
+    $_SERVER['HTTPS'] = 'on';
+}
+
 define( 'WP_DEBUG', false );
 
-// Forzar URLs con HTTPS
-define( 'WP_HOME', 'https://{{ domain_name }}' );
-define( 'WP_SITEURL', 'https://{{ domain_name }}' );
-
-# Define la ruta raíz del sitio
 if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/' );
 }
-	
-# Carga el núcleo de WordPress
+
 require_once ABSPATH . 'wp-settings.php';
-
-
-
-
-
 

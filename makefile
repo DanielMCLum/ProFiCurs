@@ -59,6 +59,7 @@ help:
 	@echo "  make apply      - Aplica la infraestructura con Terraform"
 	@echo "  make inventory  - Genera el inventario dinámico para Ansible"
 	@echo "  make ansible    - Ejecuta Ansible usando el inventario generado"
+	@echo "  make deploy	 - Ejecuta apply + inventory + ansible (sin init)"
 	@echo "  make destroy    - Elimina toda la infraestructura provisionada"
 	@echo "  make all        - Ejecuta init, apply, inventory y ansible en orden"
 	@echo "  make help       - Muestra esta ayuda"
