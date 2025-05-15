@@ -1,0 +1,59 @@
+<?php
+
+unset($CFG);
+global $CFG;
+$CFG = new stdClass();
+
+$CFG->dbtype    = 'mariadb';
+$CFG->dblibrary = 'native';
+$CFG->dbhost    = '{{ db_host }}';
+$CFG->dbname    = '{{ db_name }}';
+$CFG->dbuser    = '{{ db_user }}';
+$CFG->dbpass    = '{{ db_password }}';
+$CFG->prefix    = 'mdl_';
+$CFG->dboptions = array(
+  'dbpersist' => 0,
+  'dbport' => '',
+  'dbsocket' => '',
+  'dbcollation' => 'utf8mb4_unicode_ci',
+);
+
+$CFG->wwwroot   = '{{ moodle_url }}';
+$CFG->dataroot  = '{{ moodle_data_dir }}';
+$CFG->admin     = 'admin';
+
+$CFG->directorypermissions = 0777;
+
+$CFG->sslproxy = true;  // Si estás usando un proxy SSL
+$CFG->cachejs = true;   // Habilitar caché de JavaScript para mejorar el rendimiento
+
+
+// Configuración de sesiones (opcional)
+$CFG->session_handler_class = '\core\session\redis';
+$CFG->session_redis_host = '127.0.0.1';
+$CFG->session_redis_port = 6379;
+$CFG->session_redis_database = 0;
+$CFG->session_redis_prefix = 'moodle_session_';
+
+// Configuración de caché (opcional, pero recomendado para mejorar el rendimiento)
+$CFG->cachestores = array(
+    'redis' => array(
+        'name' => 'redis',
+        'plugin' => 'redis',
+        'configuration' => array(
+            'server' => '127.0.0.1:6379',
+            'prefix' => 'moodle_',
+        ),
+    ),
+);
+$CFG->cachetype = 'redis';
+
+// Configuración de depuración (solo para desarrollo)
+$CFG->debug = (E_ALL | E_STRICT);
+$CFG->debugdisplay = 1;
+
+// Otras configuraciones
+$CFG->lang = 'es';  // Idioma predeterminado
+$CFG->timezone = 'Europe/Madrid';  // Zona horaria
+
+require_once(__DIR__ . '/lib/setup.php');
