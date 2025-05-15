@@ -36,10 +36,9 @@
     owner: "{{ php_fpm_user }}"
     group: "{{ php_fpm_user }}"
     recurse: yes
-
-- name: Asegurar la propiedad del socket de PHP-FPM a www-data
-  file:
-    path: /run/php/php{{ php_ver }}-fpm.sock
-    owner: "{{ php_fpm_user }}"
-    group: "{{ php_fpm_user }}"
-  become: true
+#- name: Asegurar la propiedad del socket de PHP-FPM a www-data
+#  file:
+#    path: /run/php/php{{ php_ver }}-fpm.sock
+#    owner: "{{ php_fpm_user }}"
+#    group: "{{ php_fpm_user }}"
+#  become: true

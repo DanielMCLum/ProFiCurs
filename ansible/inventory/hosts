@@ -1,6 +1,0 @@
-[moodle_instance]
-3.238.33.248
-
-[moodle_instance:vars]
-ansible_user=ubuntu
-ansible_private_key_file=Vokey.pem

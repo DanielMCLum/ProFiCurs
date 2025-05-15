@@ -45,3 +45,12 @@
   file:
     path: /tmp/moodle
     state: absent
+
+#- name: Configurar fichero config.php de Moodle
+#  template:
+#    src: templates/config.php.j2
+#    dest: "{{ moodle_install_dir }}/config.php"
+#    owner: "{{ php_fpm_user }}"
+#    group: "{{ php_fpm_user }}"
+#    mode: '0644'
+#  notify: Reiniciar PHP-FPM

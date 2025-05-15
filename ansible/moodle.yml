@@ -10,12 +10,14 @@
   vars:
     nginx_server_name: "chirterfir.cat"
     php_fpm_user: www-data
-    database_host: "{{ terraform.rds_endpoint.value }}"
+    database_host: "rds-instance.crwuks62myjn.us-east-1.rds.amazonaws.com:3306"
     database_name: moodle_db
     database_user: admin
     database_password: "Pirineus123$"
+    database_root_pw: "Pirineus123$"
   roles:
     - common
     - php
+    - bd
     - webserver
     - moodle

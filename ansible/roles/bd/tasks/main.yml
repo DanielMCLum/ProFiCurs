@@ -1,0 +1,33 @@
+- name: Instalar python3-pip
+  ansible.builtin.apt:
+    name: python3-pip
+    state: present
+    update_cache: yes
+
+- name: Instalar el módulo pymysql usando pip3
+  ansible.builtin.pip:
+    name: pymysql
+    executable: pip3
+    extra_args: --break-system-packages
+    state: present
+
+- name: Cambiar el método de autenticación de root en MariaDB a mysql_native_password
+  command: >
+    mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ database_root_pw }}'); FLUSH PRIVILEGES;"
+
+- name: Crear base de datos para Moodle
+  mysql_db:
+    name: "{{ database_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ database_root_pw }}"
+
+- name: Crear usuario Moodle en MariaDB
+  mysql_user:
+    name: "{{ database_user }}"
+    password: "{{ database_password }}"
+    priv: "{{ database_name }}.*:ALL"
+    host: "localhost"
+    state: present
+    login_user: root
+    login_password: "{{ database_root_pw }}"

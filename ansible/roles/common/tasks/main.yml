@@ -6,6 +6,10 @@
 - name: Asegurar que los paquetes esenciales estén instalados
   apt:
     name:
+      - mariadb-server
+      - mariadb-client
+      - redis
+      - certbot
       - curl
       - wget
       - git
