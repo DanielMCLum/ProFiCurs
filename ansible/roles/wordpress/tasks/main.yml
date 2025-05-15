@@ -1,4 +1,13 @@
 ---
+- name: Verificar que la variable 'domain_name' está definida
+  assert:
+    that:
+      - domain_name is defined
+      - domain_name | length > 0
+    fail_msg: >
+      ❌ La variable 'domain_name' no está definida o está vacía. 
+      Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
+
 - name: Obtener claves SALT únicas
   uri:
     url: https://api.wordpress.org/secret-key/1.1/salt/

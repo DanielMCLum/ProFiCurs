@@ -16,10 +16,9 @@ $table_prefix = 'wp_';
 # Activar/desactivar modo depuración
 define( 'WP_DEBUG', false );
 
-# Usar el protocolo que viene del ALB (HTTPS), no internamente el de la instancia (HTTP) // Evita diseños rotos y advertencias HTTP
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
-    $_SERVER['HTTPS'] = 'on';
-}
+// Forzar URLs con HTTPS
+define( 'WP_HOME', 'https://{{ domain_name }}' );
+define( 'WP_SITEURL', 'https://{{ domain_name }}' );
 
 # Define la ruta raíz del sitio
 if ( ! defined( 'ABSPATH' ) ) {
