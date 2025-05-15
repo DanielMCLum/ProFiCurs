@@ -2,6 +2,15 @@
 
 Este proyecto utiliza Terraform para desplegar y gestionar una infraestructura en Azure que soporta una aplicación WordPress. La infraestructura incluye módulos para red, cómputo, base de datos y seguridad.
 
+Arquitectura del Proyecto**
+
+La infraestructura está dividida en módulos para facilitar la reutilización y administración:
+
+✅ **Red (`network`)** → Configura la **VNet y subredes** necesarias para la comunicación entre los recursos.  
+✅ **Cómputo (`compute`)** → Implementa un **VM Scale Set (VMSS)** para alojar múltiples instancias de máquinas virtuales.  
+✅ **Base de Datos (`database`)** → Configura un **servidor MySQL** para almacenar información de la aplicación.  
+✅ **Seguridad (`security`)** → Establece reglas de seguridad y monitoreo mediante **NSG y Azure Monitor**.  
+
 ## Contenido del Proyecto
 
 ### Archivos Principales
@@ -368,112 +377,3 @@ resource_group_name = "wordpress-rg"
 vmss_id             = "vmss-12345"
 workspace_id        = "workspace-67890"
 ```
-
- **Infraestructura en Azure con Terraform**
-
-Este proyecto utiliza **Terraform** para desplegar y gestionar una infraestructura automatizada en **Microsoft Azure**. La solución incluye la configuración de **red, cómputo, base de datos y seguridad**, asegurando escalabilidad y eficiencia.
-
----
-
-## **1. Arquitectura del Proyecto**
-
-La infraestructura está dividida en módulos para facilitar la reutilización y administración:
-
-✅ **Red (`network`)** → Configura la **VNet y subredes** necesarias para la comunicación entre los recursos.  
-✅ **Cómputo (`compute`)** → Implementa un **VM Scale Set (VMSS)** para alojar múltiples instancias de máquinas virtuales.  
-✅ **Base de Datos (`database`)** → Configura un **servidor MySQL** para almacenar información de la aplicación.  
-✅ **Seguridad (`security`)** → Establece reglas de seguridad y monitoreo mediante **NSG y Azure Monitor**.  
-
----
-
-## **2. Configuración de Terraform**
-
-### 📌 **Variables Globales (`variables.tf`)**
-Las siguientes variables permiten la personalización del entorno sin modificar archivos `.tf` directamente.
-hcl
-variable "location" {
-  description = "Ubicación de la infraestructura"
-  type        = string
-}
-
-variable "resource_group_name" {
-  description = "Nombre del grupo de recursos en Azure"
-  type        = string
-}
-📌 Backend (terraform.tf)
-Se utiliza Azure Storage para almacenar el estado de Terraform.
-
-hcl
-terraform {
-  backend "azurerm" {
-    resource_group_name  = "terraform-state-rg"
-    storage_account_name = "terraformstate"
-    container_name       = "tfstate"
-    key                  = "azure-wordpress-infra.tfstate"
-  }
-}
-3. Descripción de los Módulos
-📌 Módulo de Red (network)
-Este módulo crea una Virtual Network (VNet) y define las subredes necesarias.
-
-Recursos Implementados: ✅ VNet → Espacio de direcciones IP para la infraestructura. ✅ Subred Pública → Para los servicios accesibles desde Internet. ✅ Subred Privada → Para los servicios internos con acceso restringido.
-
-hcl
-resource "azurerm_virtual_network" "vnet" { ... }
-resource "azurerm_subnet" "public_subnet" { ... }
-resource "azurerm_subnet" "private_subnet" { ... }
-📌 Módulo de Cómputo (compute)
-Este módulo implementa un VM Scale Set en Azure.
-
-Recursos Implementados: ✅ VMSS → Gestión automatizada de múltiples instancias. ✅ Credenciales seguras → Usuario y contraseña de administración. ✅ Escalabilidad → Ajuste dinámico de instancias según demanda.
-
-hcl
-resource "azurerm_virtual_machine_scale_set" "vmss" { ... }
-📌 Módulo de Base de Datos (database)
-Este módulo define un servidor MySQL en Azure para almacenar datos de la aplicación.
-
-Recursos Implementados: ✅ Servidor MySQL → Base de datos estructurada en la nube. ✅ Configuración UTF-8 → Para manejo óptimo de caracteres. ✅ Acceso seguro → Gestión de credenciales protegidas.
-
-hcl
-resource "azurerm_mysql_server" "db" { ... }
-resource "azurerm_mysql_database" "wordpress_db" { ... }
-📌 Módulo de Seguridad (security)
-Este módulo gestiona las reglas de acceso y monitoreo.
-
-Recursos Implementados: ✅ NSG → Define reglas de seguridad en la red. ✅ Monitoreo en Azure Monitor → Registro de métricas y eventos de la infraestructura.
-
-hcl
-resource "azurerm_network_security_group" "nsg" { ... }
-resource "azurerm_monitor_diagnostic_setting" "monitoring" { ... }
-4. Outputs Generados
-Terraform exporta los identificadores clave de la infraestructura tras el despliegue.
-
-✅ vnet_id → ID de la Virtual Network creada. ✅ public_subnet_id → ID de la subred pública. ✅ private_subnet_id → ID de la subred privada. ✅ vmss_id → ID del VM Scale Set. ✅ db_id → ID del servidor de base de datos. ✅ nsg_id → ID del Network Security Group.
-
-Para ver un valor específico:
-
-bash
-terraform output vnet_id
-5. Despliegue de la Infraestructura
-Para inicializar Terraform:
-
-bash
-terraform init
-Para visualizar los cambios antes de aplicarlos:
-
-bash
-terraform plan
-Para desplegar la infraestructura en Azure:
-
-bash
-terraform apply
-Para eliminar la infraestructura:
-
-bash
-terraform destroy
-6. Integraciones y Monitoreo
-📌 Integraciones disponibles: 🔹 Ansible → Configuración post-deployment automatizada. 🔹 Azure Monitor → Registro de eventos y métricas. 🔹 CI/CD → Terraform dentro de pipelines DevOps para despliegue continuo.
-
-🚀 Este proyecto proporciona una infraestructura modular, escalable y segura en Azure mediante Terraform.
-
-
