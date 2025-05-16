@@ -1,0 +1,28 @@
+server {
+    listen 80;
+    server_name {{ domain_name }};
+
+    return 301 https://$host$request_uri;
+
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+    # Redirección local opcional, por si llega tráfico directo sin pasar por el ALB
+    location ~ ^/.well-known/acme-challenge/ {
+        root /var/www/html;
+        allow all;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php{{ php_version }}-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}

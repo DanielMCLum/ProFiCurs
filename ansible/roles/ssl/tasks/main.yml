@@ -1,0 +1,7 @@
+- name: Asegurar directorio raíz para WordPress
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'

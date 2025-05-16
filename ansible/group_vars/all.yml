@@ -1,0 +1,15 @@
+# Wordpress Variables
+wp_db_name: wordpress
+wp_db_user: wpuser
+wp_db_password: wpsecurepass
+
+# Conexión con la instancia EC2
+ansible_user: ubuntu
+ansible_ssh_private_key_file: terraform/devops.pem
+
+# PHP
+php_version: "8.1"
+
+# SSL
+domain_name: www.caleit.cat
+ssl_email: contacto@caleit.cat

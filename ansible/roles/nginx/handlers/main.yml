@@ -1,0 +1,4 @@
+- name: Recargar Nginx
+  service:
+    name: nginx
+    state: reloaded

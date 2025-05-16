@@ -1,0 +1,8 @@
+- name: Configurar servidor WordPress con LEMP
+  hosts: web
+  become: yes
+  roles:
+    - nginx
+    - php
+    - mysql
+    - wordpress
