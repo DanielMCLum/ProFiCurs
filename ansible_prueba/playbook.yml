@@ -16,161 +16,161 @@
     php_version: "8.3"
 
   tasks:
-    - name: Actualizar paquetes
-      apt:
-        update_cache: yes
-        upgrade: yes
+  - name: Actualizar paquetes
+    apt:
+      update_cache: yes
+      upgrade: yes
 
-    - name: Agregar repositorio de Ondrej Sury para PHP
-      apt_repository:
-        repo: "ppa:ondrej/php"
-        state: present
+  - name: Agregar repositorio de Ondrej Sury para PHP
+    apt_repository:
+      repo: "ppa:ondrej/php"
+      state: present
 
-    - name: Instalar dependencias
-      apt:
-        name:
-          - apache2
-          - php{{ php_version }}-fpm
-          - php{{ php_version }}-cli
-          - php{{ php_version }}-mysql
-          - php{{ php_version }}-xml
-          - php{{ php_version }}-mbstring
-          - php{{ php_version }}-curl
-          - php{{ php_version }}-zip
-          - php{{ php_version }}-gd
-          - php{{ php_version }}-intl
-          - php{{ php_version }}-soap
-          - php{{ php_version }}-bcmath
-          - php{{ php_version }}-redis
-          - mariadb-server
-          - mariadb-client
-          - redis
-          - git
-          - certbot
-          - python3-certbot-apache
-        state: present
-    
-    - name: Instalar python3-pip
-      ansible.builtin.apt:
-        name: python3-pip
-        state: present
-        update_cache: yes
-
-    - name: Instalar el módulo pymysql usando pip3
-      ansible.builtin.pip:
-        name: pymysql
-        executable: pip3
-        extra_args: --break-system-packages
-        state: present
-
-    - name: Ensure PHP-FPM is running and enabled
-      systemd:
-        name: php{{ php_version }}-fpm
-        state: started
-        enabled: yes
-
-    - name: Crear directorio de datos para Moodle
-      file:
-        path: "{{ moodle_data_dir }}"
-        state: directory
-        owner: www-data
-        group: www-data
-        mode: '0755'
-
-    - name: Configurar el directorio de Moodle como seguro en Git
-      command: git config --global --add safe.directory {{ moodle_dir }}
-      become: yes
-      tags: git-safe-directory
-
-    - name: Clonar Moodle desde Git
-      git:
-        repo: "{{ moodle_git_repo }}"
-        dest: "{{ moodle_dir }}"
-        version: "MOODLE_405_STABLE"
-        force: yes
-      tags: clone-moodle
-
-    - name: Configurar permisos de escritura para Moodle
-      file:
-        path: "{{ moodle_dir }}"
-        owner: www-data
-        group: www-data
-        recurse: yes
-
-    - name: Cambiar el método de autenticación de root en MariaDB a mysql_native_password
-      command: >
-        mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ db_root_password }}'); FLUSH PRIVILEGES;"
-
-    - name: Crear base de datos para Moodle
-      mysql_db:
-        name: "{{ db_name }}"
-        state: present
-        login_user: root
-        login_password: "{{ db_root_password }}"
-
-    - name: Crear usuario Moodle en MariaDB
-      mysql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        priv: "{{ db_name }}.*:ALL"
-        host: "localhost"
-        state: present
-        login_user: root
-        login_password: "{{ db_root_password }}"
-
-    - name: Configurar VirtualHost para Moodle con SSL y PHP-FPM
-      copy:
-        dest: "/etc/apache2/sites-available/moodle.conf"
-        content: |
-          <VirtualHost *:80>
-              ServerName {{ moodle_dns }}
-              DocumentRoot {{ moodle_dir }}
-
-              <Directory {{ moodle_dir }}>
-                  AllowOverride All
-                  Require all granted
-              </Directory>
-
-              # Enable PHP-FPM
-              <FilesMatch \.php$>
-                  SetHandler "proxy:unix:/run/php/php{{ php_version }}-fpm.sock|fcgi://localhost"
-              </FilesMatch>
-
-              ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
-              CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
-          </VirtualHost>
-      notify: Restart Apache
-
-    - name: Habilitar módulos necesarios
-      shell: |
-        a2enmod ssl
-        a2enmod rewrite
-        a2enmod proxy_fcgi
-        a2enmod setenvif
-      notify: Restart Apache
-
-    - name: Habilitar VirtualHost y deshabilitar el predeterminado
-      shell: |
-        a2ensite moodle.conf  # Fixed name
-        a2dissite 000-default.conf
-      notify: Restart Apache
-
-    - name: Configurar fichero config.php de Moodle
-      template:
-        src: templates/config.php.j2
-        dest: "{{ moodle_dir }}/config.php"
-        owner: www-data
-        group: www-data
-        mode: '0644'
-      notify: Restart PHP-FPM
-
-    - name: Reiniciar servicios
-      systemd:
-        name: "{{ item }}"
-        state: restarted
-      loop:
-        - mysql
+  - name: Instalar dependencias
+    apt:
+      name:
+        - apache2
+        - php{{ php_version }}-fpm
+        - php{{ php_version }}-cli
+        - php{{ php_version }}-mysql
+        - php{{ php_version }}-xml
+        - php{{ php_version }}-mbstring
+        - php{{ php_version }}-curl
+        - php{{ php_version }}-zip
+        - php{{ php_version }}-gd
+        - php{{ php_version }}-intl
+        - php{{ php_version }}-soap
+        - php{{ php_version }}-bcmath
+        - php{{ php_version }}-redis
+        - mariadb-server
+        - mariadb-client
         - redis
+        - git
+        - certbot
+        - python3-certbot-apache
+      state: present
+  
+  - name: Instalar python3-pip
+    ansible.builtin.apt:
+      name: python3-pip
+      state: present
+      update_cache: yes
+
+  - name: Instalar el módulo pymysql usando pip3
+    ansible.builtin.pip:
+      name: pymysql
+      executable: pip3
+      extra_args: --break-system-packages
+      state: present
+
+  - name: Ensure PHP-FPM is running and enabled
+    systemd:
+      name: php{{ php_version }}-fpm
+      state: started
+      enabled: yes
+
+  - name: Crear directorio de datos para Moodle
+    file:
+      path: "{{ moodle_data_dir }}"
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: '0755'
+
+  - name: Configurar el directorio de Moodle como seguro en Git
+    command: git config --global --add safe.directory {{ moodle_dir }}
+    become: yes
+    tags: git-safe-directory
+
+  - name: Clonar Moodle desde Git
+    git:
+      repo: "{{ moodle_git_repo }}"
+      dest: "{{ moodle_dir }}"
+      version: "MOODLE_405_STABLE"
+      force: yes
+    tags: clone-moodle
+
+  - name: Configurar permisos de escritura para Moodle
+    file:
+      path: "{{ moodle_dir }}"
+      owner: www-data
+      group: www-data
+      recurse: yes
+
+  - name: Cambiar el método de autenticación de root en MariaDB a mysql_native_password
+    command: >
+      mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('{{ db_root_password }}'); FLUSH PRIVILEGES;"
+
+  - name: Crear base de datos para Moodle
+    mysql_db:
+      name: "{{ db_name }}"
+      state: present
+      login_user: root
+      login_password: "{{ db_root_password }}"
+
+  - name: Crear usuario Moodle en MariaDB
+    mysql_user:
+      name: "{{ db_user }}"
+      password: "{{ db_password }}"
+      priv: "{{ db_name }}.*:ALL"
+      host: "localhost"
+      state: present
+      login_user: root
+      login_password: "{{ db_root_password }}"
+
+  - name: Configurar VirtualHost para Moodle con SSL y PHP-FPM
+    copy:
+      dest: "/etc/apache2/sites-available/moodle.conf"
+      content: |
+        <VirtualHost *:80>
+            ServerName {{ moodle_dns }}
+            DocumentRoot {{ moodle_dir }}
+
+            <Directory {{ moodle_dir }}>
+                AllowOverride All
+                Require all granted
+            </Directory>
+
+            # Enable PHP-FPM
+            <FilesMatch \.php$>
+                SetHandler "proxy:unix:/run/php/php{{ php_version }}-fpm.sock|fcgi://localhost"
+            </FilesMatch>
+
+            ErrorLog ${APACHE_LOG_DIR}/moodle_error.log
+            CustomLog ${APACHE_LOG_DIR}/moodle_access.log combined
+        </VirtualHost>
+    notify: Restart Apache
+
+  - name: Habilitar módulos necesarios
+    shell: |
+      a2enmod ssl
+      a2enmod rewrite
+      a2enmod proxy_fcgi
+      a2enmod setenvif
+    notify: Restart Apache
+
+  - name: Habilitar VirtualHost y deshabilitar el predeterminado
+    shell: |
+      a2ensite moodle.conf  # Fixed name
+      a2dissite 000-default.conf
+    notify: Restart Apache
+
+  #- name: Configurar fichero config.php de Moodle
+  #  template:
+  #    src: templates/config.php.j2
+  #    dest: "{{ moodle_dir }}/config.php"
+  #    owner: www-data
+  #    group: www-data
+  #    mode: '0644'
+  #  notify: Restart PHP-FPM
+
+  - name: Reiniciar servicios
+    systemd:
+      name: "{{ item }}"
+      state: restarted
+    loop:
+      - mysql
+      - redis
 
   handlers:
     - name: Restart Apache
