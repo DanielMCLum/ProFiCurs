@@ -10,7 +10,7 @@
 # Define el grupo de recursos donde se alojarán todos los servicios.
 resource "azurerm_resource_group" "wp" {
   name     = "wordpress-student-rg"
-  location = "westeurope"  # Región recomendada por estabilidad
+  location = "eastus"  # Región recomendada por estabilidad
 }
 
 # 2️⃣ App Service Plan (Gratis)
