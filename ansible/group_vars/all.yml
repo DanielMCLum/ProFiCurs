@@ -6,10 +6,6 @@ wp_db_name: wordpress
 wp_db_user: wpuser
 wp_db_password: wpsecurepass
 
-# Conexión con la instancia EC2
-#ansible_user: ubuntu
-#ansible_ssh_private_key_file: terraform/devops.pem
-
 # PHP
 php_version: "8.1"
 
@@ -18,5 +14,4 @@ domain_name: www.caleit.cat
 ssl_email: contacto@caleit.cat
 
 # EFS
-efs_id: fs-05f2a18c0a9c9a1c1 
-efs_dns: "{{ efs_id }}.efs.{{ aws_region }}.amazonaws.com:/"
+efs_id: fs-0cc8183cbbb4ba07d
