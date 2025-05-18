@@ -1,0 +1,19 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - us-east-1
+
+keyed_groups:
+  - key: tags.Role
+    prefix: tag
+    separator: '_'
+
+filters:
+  tag:Role: wordpress
+
+hostnames:
+  - public_ip_address
+
+compose:
+  ansible_host: public_ip_address
+
+strict: False
