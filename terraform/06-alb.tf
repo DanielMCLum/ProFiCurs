@@ -57,6 +57,7 @@ resource "aws_lb_listener" "https" {
   }
 }
 
+/*
 # Registrar instancias WordPress en el target group
 resource "aws_lb_target_group_attachment" "wordpress_instances" {
   count            = length(aws_instance.wordpress)
@@ -64,4 +65,4 @@ resource "aws_lb_target_group_attachment" "wordpress_instances" {
   target_id        = aws_instance.wordpress[count.index].id
   port             = 80
 }
-
+*/
