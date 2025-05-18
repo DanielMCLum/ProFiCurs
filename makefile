@@ -3,11 +3,9 @@ TF_DIR=terraform
 ANSIBLE_DIR=ansible
 
 KEY_PATH=$(TF_DIR)/devops.pem
-
-# Variables dinámicas
 INVENTORY_FILE=$(ANSIBLE_DIR)/inventory.ini
 
-.PHONY: all init apply destroy ansible inventory output plan validate
+.PHONY: all init apply destroy ansible inventory output plan validate deploy help
 
 # Ejecuta todo el flujo: init, apply, inventario, ansible
 all: init apply inventory ansible
@@ -32,7 +30,7 @@ plan:
 destroy:
 	terraform -chdir=$(TF_DIR) destroy -auto-approve
 
-# Genera el inventario dinámico desde Terraform para Ansible
+# Genera el inventario dinámico desde Terraform y AWS para Ansible
 inventory:
 	@echo "Actualizando inventario Ansible..."
 	@./generate_inventory.sh
@@ -41,17 +39,17 @@ inventory:
 ansible:
 	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(INVENTORY_FILE) $(ANSIBLE_DIR)/playbook.yml
 
+# Alternativa sin reinicializar
 deploy: ## Ejecuta apply + inventory + ansible (sin init)
 	$(MAKE) apply
 	$(MAKE) inventory
 	$(MAKE) ansible
-	
 
 # Muestra las salidas definidas en outputs.tf
 output:
 	terraform -chdir=$(TF_DIR) output
 
-
+# Ayuda
 help:
 	@echo "Comandos disponibles:"
 	@echo ""
@@ -59,7 +57,8 @@ help:
 	@echo "  make apply      - Aplica la infraestructura con Terraform"
 	@echo "  make inventory  - Genera el inventario dinámico para Ansible"
 	@echo "  make ansible    - Ejecuta Ansible usando el inventario generado"
-	@echo "  make deploy	 - Ejecuta apply, inventory y ansible"
+	@echo "  make deploy     - Ejecuta apply, inventory y ansible (sin init)"
 	@echo "  make destroy    - Elimina toda la infraestructura provisionada"
 	@echo "  make all        - Ejecuta init, apply, inventory y ansible, en ese orden"
+	@echo "  make output     - Muestra los valores de salida de Terraform"
 	@echo "  make help       - Muestra esta ayuda"
