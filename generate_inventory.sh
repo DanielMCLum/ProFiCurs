@@ -1,18 +1,32 @@
 #!/bin/bash
 
 TF_STATE_DIR="terraform"
-INVENTORY_FILE="ansible/inventory.ini"
+ANSIBLE_DIR="ansible"
+INVENTORY_FILE="${ANSIBLE_DIR}/inventory.ini"
+GROUP_VARS_FILE="${ANSIBLE_DIR}/group_vars/all.yml"
 
-# Obtener IPs públicas de instancias EC2 desde Terraform
-IP_LIST=$(terraform -chdir="$TF_STATE_DIR" output -json | jq -r '.ec2_public_ips.value[]')
+# Obtener IPs públicas desde Terraform
+IP_LIST=$(terraform -chdir=${TF_STATE_DIR} output -json | jq -r '.ec2_public_ips.value[]')
 
-# Escribir encabezado de grupo
-echo "[web]" > "$INVENTORY_FILE"
+# Obtener el ID del EFS desde Terraform
+EFS_ID=$(terraform -chdir=${TF_STATE_DIR} output -raw efs_id)
 
-# Escribir cada IP en el archivo inventory.ini
+# Crear/Actualizar archivo de inventario
+echo "[web]" > "${INVENTORY_FILE}"
 for ip in $IP_LIST; do
-  echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=terraform/devops.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'" >> "$INVENTORY_FILE"
+  echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=terraform/devops.pem" >> "${INVENTORY_FILE}"
 done
 
-echo "✅ Inventario Ansible actualizado en: $INVENTORY_FILE"
+# Añadir el ID del EFS a group_vars/all.yml
+if grep -q "^efs_id:" "$GROUP_VARS_FILE"; then
+  # Si ya existe, lo reemplaza
+  sed -i "s/^efs_id:.*/efs_id: ${EFS_ID}/" "$GROUP_VARS_FILE"
+else
+  # Si no existe, lo añade
+  echo -e "\nefs_id: ${EFS_ID}" >> "$GROUP_VARS_FILE"
+fi
+
+echo "✅ Inventario actualizado en: ${INVENTORY_FILE}"
+echo "✅ EFS ID actualizado en: ${GROUP_VARS_FILE}"
+
 
