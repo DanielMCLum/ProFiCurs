@@ -1,14 +1,30 @@
-# Ignorar el directorio .terraform
-.terraform*
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars
 
-# Ignorar archivos de estado de Terraform
-*.tfstate*
+# Ansible
+ansible/inventory.ini
+ansible/group_vars/*.yml  # Si contiene datos sensibles como contraseñas
+*.retry
 
-# Ignorar archivos temporales o específicos del sistema
-.override*
+# Python (entorno virtual)
+.venv/
+__pycache__/
+*.pyc
 
-# Ignorar la clave publica
-*.pem
+# SSH claves
+terraform/*.pem
 
-# Ignorar otros tipos de configuración de vscode
-*.vscode
+# Archivos temporales o de sistema
+*.log
+*.bak
+*.swp
+.DS_Store
+
+# Archivos de salida
+*.zip
+*.tar.gz
+*.tgz
