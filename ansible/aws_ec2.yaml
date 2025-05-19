@@ -3,10 +3,11 @@ regions:
   - us-east-1
 filters:
   tag:Name:
-    - wordpress-launch-template
+    - wordpress-asg-instance
 host_key_checks: False
 strict: False
 keyed_groups:
   - key: tags.Name
     prefix: tag
     separator: "_"
+

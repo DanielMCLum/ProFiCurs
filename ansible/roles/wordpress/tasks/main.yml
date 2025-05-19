@@ -37,7 +37,7 @@
 
 - name: Definir si soy el nodo líder
   set_fact:
-    is_leader: "{{ inventory_hostname == groups['web'][0] }}"
+    is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'][0] }}"
 
 # -----------------------------
 # INSTALACIÓN WORDPRESS (solo líder)

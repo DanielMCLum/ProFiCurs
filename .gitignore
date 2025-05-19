@@ -16,7 +16,7 @@ __pycache__/
 *.pyc
 
 # SSH claves
-terraform/*.pem
+*.pem
 
 # Archivos temporales o de sistema
 *.log

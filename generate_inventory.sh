@@ -25,8 +25,8 @@ while read ip; do
   echo "$ip ansible_user=ubuntu ansible_ssh_private_key_file=../terraform/devops.pem" >> "$INVENTORY_FILE"
 done
 
-echo "✅ Inventario actualizado en: ${INVENTORY_FILE}"
-echo "✅ EFS ID actualizado en: ${GROUP_VARS_FILE}"
+echo " *** Inventario actualizado en: ${INVENTORY_FILE}"
+echo " *** EFS ID actualizado en: ${GROUP_VARS_FILE}"
 
 
 

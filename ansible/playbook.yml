@@ -1,5 +1,5 @@
 - name: Configurar servidor WordPress con LEMP
-  hosts: web
+  hosts: tag_wordpress_asg_instance
   become: yes
   roles:
     - nginx
