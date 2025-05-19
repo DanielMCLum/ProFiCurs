@@ -7,6 +7,6 @@ resource "aws_instance" "wordpress" {
   associate_public_ip_address = true
 
   tags = {
-    Name = "wordpress-${count.index}"
+    Name = "wordpress-${count.index + 1}"
   }
 }

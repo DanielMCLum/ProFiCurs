@@ -9,7 +9,8 @@ resource "aws_sns_topic_subscription" "email_subscription" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "EC2-CPU-High-${aws_instance.wordpress.tags.Name}"
+  for_each = { for i in range(length(aws_instance.wordpress)) : i => aws_instance.wordpress[i] }
+  alarm_name          = "EC2-CPU-High-${each.value.tags.Name}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   metric_name         = "CPUUtilization"
@@ -19,7 +20,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   threshold           = 80.0
   alarm_description   = "Alarma cuando la utilización de la CPU supera el 80% durante 5 minutos"
   dimensions = {
-    InstanceId = aws_instance.wordpress.id
+    InstanceId = each.value.id
   }
   alarm_actions = [
     aws_sns_topic.alarm_notifications.arn
@@ -27,7 +28,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "network_in_high" {
-  alarm_name          = "EC2-NetworkIn-High-${aws_instance.wordpress.tags.Name}"
+  for_each = { for i in range(length(aws_instance.wordpress)) : i => aws_instance.wordpress[i] }
+  alarm_name          = "EC2-NetworkIn-High-${each.value.tags.Name}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   metric_name         = "NetworkIn"
@@ -38,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "network_in_high" {
   unit                = "Bytes/Second"
   alarm_description   = "Alarma cuando el tráfico de red entrante promedio supera los 10 MB/min durante 5 minutos"
   dimensions = {
-    InstanceId = aws_instance.wordpress.id
+    InstanceId = each.value.id
   }
   alarm_actions = [
     aws_sns_topic.alarm_notifications.arn
@@ -46,7 +48,8 @@ resource "aws_cloudwatch_metric_alarm" "network_in_high" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "network_out_high" {
-  alarm_name          = "EC2-NetworkOut-High-${aws_instance.wordpress.tags.Name}"
+  for_each = { for i in range(length(aws_instance.wordpress)) : i => aws_instance.wordpress[i] }
+  alarm_name          = "EC2-NetworkOut-High-${each.value.tags.Name}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 5
   metric_name         = "NetworkOut"
@@ -57,7 +60,7 @@ resource "aws_cloudwatch_metric_alarm" "network_out_high" {
   unit                = "Bytes/Second"
   alarm_description   = "Alarma cuando el tráfico de red saliente promedio supera los 10 MB/min durante 5 minutos"
   dimensions = {
-    InstanceId = aws_instance.wordpress.id
+    InstanceId = each.value.id
   }
   alarm_actions = [
     aws_sns_topic.alarm_notifications.arn
