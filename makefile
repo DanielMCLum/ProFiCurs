@@ -1,9 +1,7 @@
 # Variables
 TF_DIR=terraform
 ANSIBLE_DIR=ansible
-
-KEY_PATH=$(TF_DIR)/devops.pem
-INVENTORY_FILE=$(ANSIBLE_DIR)/inventory.ini
+GROUP_VARS_FILE=$(ANSIBLE_DIR)/group_vars/all.yml
 
 .PHONY: all init apply destroy ansible inventory output plan validate deploy help
 
@@ -30,17 +28,17 @@ plan:
 destroy:
 	terraform -chdir=$(TF_DIR) destroy -auto-approve
 
-# Genera el inventario dinámico desde Terraform y AWS para Ansible
+# Solo actualiza el efs_id en group_vars/all.yml
 inventory:
-	@echo "Actualizando inventario Ansible..."
+	@echo "Actualizando configuración de EFS para Ansible..."
 	@./generate_inventory.sh
 
-# Ejecuta Ansible sobre las instancias creadas
+# Ejecuta Ansible usando inventario dinámico (aws_ec2.yaml definido en ansible.cfg)
 ansible:
-	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(INVENTORY_FILE) $(ANSIBLE_DIR)/playbook.yml
+	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook $(ANSIBLE_DIR)/playbook.yml
 
 # Alternativa sin reinicializar
-deploy: ## Ejecuta apply + inventory + ansible (sin init)
+deploy:
 	$(MAKE) apply
 	$(MAKE) inventory
 	$(MAKE) ansible
@@ -55,8 +53,8 @@ help:
 	@echo ""
 	@echo "  make init       - Inicializa Terraform en el directorio ./terraform"
 	@echo "  make apply      - Aplica la infraestructura con Terraform"
-	@echo "  make inventory  - Genera el inventario dinámico para Ansible"
-	@echo "  make ansible    - Ejecuta Ansible usando el inventario generado"
+	@echo "  make inventory  - Actualiza efs_id en group_vars/all.yml"
+	@echo "  make ansible    - Ejecuta Ansible con inventario dinámico"
 	@echo "  make deploy     - Ejecuta apply, inventory y ansible (sin init)"
 	@echo "  make destroy    - Elimina toda la infraestructura provisionada"
 	@echo "  make all        - Ejecuta init, apply, inventory y ansible, en ese orden"
