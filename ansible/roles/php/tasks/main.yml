@@ -1,11 +1,18 @@
+---
 - name: Instalar PHP y módulos requeridos
   apt:
     name:
-      - php8.1
-      - php8.1-cli
-      - php8.1-fpm
-      - php8.1-mysql
-      - php-mbstring
+      - php
+      - php-fpm
+      - php-mysql
       - php-curl
       - php-xml
+      - php-mbstring
     state: present
+    update_cache: true
+
+- name: Asegurar que PHP-FPM está iniciado y habilitado
+  service:
+    name: php{{ php_version }}-fpm
+    state: started
+    enabled: true
