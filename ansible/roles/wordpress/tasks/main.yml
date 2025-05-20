@@ -1,12 +1,11 @@
----
 - name: Verificar que la variable 'domain_name' está definida
   assert:
     that:
       - domain_name is defined
       - domain_name | length > 0
     fail_msg: >
-      X Error X La variable 'domain_name' no está definida o está vacía.
-      Asegurarse de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
+      XXX ERROR XXX La variable 'domain_name' no está definida o está vacía.
+      Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
 
 # -----------------------------
 # SOPORTE EFS: NFS y montaje
@@ -16,8 +15,9 @@
   apt:
     name: nfs-common
     state: present
+    update_cache: true
 
-- name: Asegurar punto de montaje EFS
+- name: Asegurar que el punto de montaje EFS existe
   file:
     path: /var/www/html
     state: directory
@@ -32,15 +32,14 @@
     state: mounted
 
 # -----------------------------
-# DESIGNAR LÍDER PARA INSTALACIÓN
+# DETECTAR NODO LÍDER
 # -----------------------------
-
 - name: Definir si soy el nodo líder
   set_fact:
-    is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'][0] }}"
+    is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'] | sort | first }}"
 
 # -----------------------------
-# INSTALACIÓN WORDPRESS (solo líder)
+# INSTALACIÓN WORDPRESS SOLO EN EL LÍDER
 # -----------------------------
 
 - name: Obtener claves SALT únicas
@@ -63,6 +62,7 @@
       - php-mysql
       - php-curl
     state: present
+    update_cache: true
 
 - name: Descargar WordPress
   get_url:
@@ -109,11 +109,11 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  notify: Recargar Nginx
   when: is_leader
+  notify: Recargar Nginx
 
 # -----------------------------
-# WP-CLI OPCIONAL (INSTALAR EN TODOS)
+# WP-CLI
 # -----------------------------
 
 - name: Descargar WP-CLI
