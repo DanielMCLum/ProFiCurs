@@ -1,13 +1,19 @@
-plugin: aws_ec2
+plugin: aws_ec2  # Usa el plugin de inventario dinámico de Ansible para AWS EC2
+
 regions:
-  - us-east-1
+  - us-east-1    # Región de AWS donde buscar instancias ( se puede añadir más )
+
 filters:
   tag:Name:
-    - wordpress-asg-instance
-host_key_checks: False
-strict: False
+    - wordpress-asg-instance  # Solo incluir instancias con este tag Name en EC2
+
+host_key_checks: False  # Evita errores si cambia la huella SSH del host
+
+strict: False  # Permite que el inventario ignore fallos parciales sin detenerse
+
 keyed_groups:
-  - key: tags.Name
-    prefix: tag
-    separator: "_"
+  - key: tags.Name         # Agrupa instancias por el valor del tag 'Name'
+    prefix: tag            # El nombre del grupo será: tag_<valor>
+    separator: "_"         # Se usa "_" en lugar de "-" para separar prefijo y valor
+
 

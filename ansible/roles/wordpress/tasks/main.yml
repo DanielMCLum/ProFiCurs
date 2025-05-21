@@ -1,3 +1,4 @@
+# Asegura que la variable del dominio esté definida
 - name: Verificar que la variable 'domain_name' está definida
   assert:
     that:
@@ -7,22 +8,25 @@
       XXX ERROR XXX La variable 'domain_name' no está definida o está vacía.
       Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
 
-# -----------------------------
-# SOPORTE EFS: NFS y montaje
-# -----------------------------
+# =========================
+# Soporte para EFS (NFS)
+# =========================
 
+# Instala el cliente NFS necesario para montar EFS
 - name: Instalar soporte para NFS (requerido por EFS)
   apt:
     name: nfs-common
     state: present
     update_cache: true
 
+# Asegura que exista el directorio de montaje para EFS
 - name: Asegurar que el punto de montaje EFS existe
   file:
     path: /var/www/html
     state: directory
     mode: '0755'
 
+# Monta el EFS en /var/www/html (donde se alojará WordPress)
 - name: Montar EFS en /var/www/html
   mount:
     path: /var/www/html
@@ -31,16 +35,18 @@
     opts: "nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
     state: mounted
 
-# -----------------------------
-# DETECTAR NODO LÍDER
-# -----------------------------
+# =========================
+# Nodo líder (solo 1 instancia hace instalación completa)
+# =========================
+
+# Define si esta instancia es el nodo líder (la que se encargará de instalar WordPress)
 - name: Definir si soy el nodo líder
   set_fact:
     is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'] | sort | first }}"
 
-# -----------------------------
-# INSTALACIÓN WORDPRESS SOLO EN EL LÍDER
-# -----------------------------
+# =========================
+# Instalación de WordPress
+# =========================
 
 - name: Obtener claves SALT únicas
   uri:
@@ -54,6 +60,7 @@
     wp_salts: "{{ wp_salts_raw.content }}"
   when: is_leader
 
+# Instala utilidades necesarias para el proceso de descarga/descompresión
 - name: Instalar dependencias necesarias
   apt:
     name:
@@ -77,6 +84,7 @@
     remote_src: yes
   when: is_leader
 
+# Elimina página de bienvenida de Nginx si existe
 - name: Eliminar archivo de bienvenida de Nginx si existe
   file:
     path: /var/www/html/index.nginx-debian.html
@@ -84,6 +92,7 @@
   ignore_errors: true
   when: is_leader
 
+# Copia archivos de WordPress a /var/www/html
 - name: Copiar WordPress a /var/www/html (sobrescribiendo)
   copy:
     src: /tmp/wordpress/
@@ -94,6 +103,7 @@
     remote_src: yes
   when: is_leader
 
+# Asegura permisos correctos en todo el directorio
 - name: Establecer permisos en /var/www/html
   file:
     path: /var/www/html
@@ -102,6 +112,7 @@
     recurse: yes
   when: is_leader
 
+# Genera el archivo wp-config.php a partir de plantilla
 - name: Plantilla de wp-config.php
   template:
     src: wp-config.php.j2
@@ -112,9 +123,9 @@
   when: is_leader
   notify: Recargar Nginx
 
-# -----------------------------
-# WP-CLI
-# -----------------------------
+# =========================
+# Instalación de WP-CLI
+# =========================
 
 - name: Descargar WP-CLI
   get_url:

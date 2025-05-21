@@ -1,38 +1,64 @@
+# Inicia un bloque de configuración de servidor
 server {
+
+    # Nginx escuchará en el puerto 80 (HTTP)
     listen 80;
+
+    # Usa la variable 'domain_name' definida en Ansible (group_vars)
     server_name {{ domain_name }};
 
+    # Directorio raíz de los archivos públicos del sitio (WordPress)
     root /var/www/html;
+
+    # Archivos a buscar como índice
     index index.php index.html index.htm;
 
-    # Detectar HTTPS a través del header del ALB
+    #####################################################
+    # Manejo especial para detectar si el tráfico viene
+    # originalmente por HTTPS desde el ALB
+    #####################################################
+
+    # Variable personalizada que se usará más abajo
     set $https_forwarded "";
+
+    # Si el header del ALB dice que el protocolo original fue HTTPS
     if ($http_x_forwarded_proto = "https") {
+        # Entonces marcamos esa variable como 'on'
         set $https_forwarded "on";
     }
 
-    # Configuración general
+    #####################################################
+    # Ruta por defecto (el home del sitio)
+    #####################################################
     location / {
+        # Si el archivo no existe, intenta con /index.php?args
         try_files $uri $uri/ /index.php?$args;
     }
 
+    #####################################################
+    # Manejo de archivos PHP
+    #####################################################
     location ~ \.php$ {
+        # Configuración estándar de FastCGI
         include snippets/fastcgi-php.conf;
         include fastcgi_params;
+
+        # Usa el socket de PHP-FPM según la versión configurada
         fastcgi_pass unix:/run/php/php{{ php_version }}-fpm.sock;
 
-        # Añadir headers de proxy para HTTPS
+        # Informa al backend PHP si el tráfico fue originalmente HTTPS
         fastcgi_param HTTPS $https_forwarded;
+
+        # También pasa el header original del protocolo
         fastcgi_param HTTP_X_FORWARDED_PROTO $http_x_forwarded_proto;
     }
 
+    #####################################################
+    # Seguridad: bloquear archivos ocultos como .htaccess
+    #####################################################
     location ~ /\.ht {
         deny all;
     }
 
-    # Redirección local opcional, por si llega tráfico directo sin pasar por el ALB
-    location ~ ^/.well-known/acme-challenge/ {
-        root /var/www/html;
-        allow all;
-    }
 }
+

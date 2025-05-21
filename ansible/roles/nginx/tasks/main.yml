@@ -1,18 +1,20 @@
----
+# Intenta detener el servicio Apache si está activo (por si está instalado por defecto)
 - name: Detener Apache2 si está en ejecución
   service:
     name: apache2
     state: stopped
     enabled: false
-  ignore_errors: true
+  ignore_errors: true  # No falla si Apache no está instalado
 
+# Elimina completamente Apache2 si está presente
 - name: Eliminar Apache2 si está instalado
   apt:
     name: apache2
     state: absent
-    purge: yes
-    autoremove: yes
+    purge: yes           # Elimina configuración también
+    autoremove: yes      # Elimina dependencias innecesarias
 
+# Borra archivos de configuración residuales de Apache (si quedaran)
 - name: Eliminar configuraciones residuales de Apache
   file:
     path: "{{ item }}"
@@ -20,29 +22,34 @@
   loop:
     - /etc/apache2
     - /var/www/html/index.html
-  ignore_errors: true
+  ignore_errors: true  # Continúa si el archivo no existe
 
+# Actualiza la caché de paquetes del sistema (para evitar errores con paquetes desactualizados)
 - name: Actualizar apt
   apt:
     update_cache: yes
-    cache_valid_time: 3600
+    cache_valid_time: 3600  # Si tiene menos de 1h, no fuerza actualización
 
+# Instala Nginx desde los repositorios
 - name: Instalar Nginx
   apt:
     name: nginx
     state: present
 
+# Asegura que el servicio de Nginx esté activo y habilitado en el arranque
 - name: Iniciar y habilitar Nginx
   service:
     name: nginx
     state: started
     enabled: yes
 
+# Sustituye la configuración por defecto de Nginx con una plantilla personalizada
 - name: Plantilla de configuración Nginx con PHP dinámico
   template:
-    src: templates/default.conf.j2
-    dest: /etc/nginx/sites-available/default
+    src: templates/default.conf.j2           # Ruta a la plantilla de configuración personalizada
+    dest: /etc/nginx/sites-available/default # Archivo final en el sistema
     owner: root
     group: root
     mode: '0644'
-  notify: Recargar Nginx
+  notify: Recargar Nginx  # Si esta tarea cambia algo, se ejecuta el handler
+

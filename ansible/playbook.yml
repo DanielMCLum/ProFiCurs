@@ -1,8 +1,21 @@
+# Nombre descriptivo del playbook, aparece al iniciar la ejecución
 - name: Configurar servidor WordPress con LEMP
+
+  # Define sobre qué hosts se ejecutará este playbook.
+  # 'tag_wordpress_asg_instance' es un grupo dinámico que detecta instancias EC2 con ese tag.
   hosts: tag_wordpress_asg_instance
+
+  # Requiere privilegios de administrador (root) para ejecutar las tareas
   become: yes
+
+  # Lista de roles que se ejecutarán en orden
+  # Cada uno corresponde a una parte de la pila LEMP:
+  # - Nginx: servidor web
+  # - PHP: backend dinámico
+  # - MySQL: base de datos
+  # - WordPress: CMS que se instalará
   roles:
-    - nginx
-    - php
-    - mysql
-    - wordpress
+    - nginx       # Configura Nginx como servidor web
+    - php         # Instala PHP y módulos necesarios
+    - mysql       # Instala y configura MySQL para WordPress
+    - wordpress   # Instala WordPress y lo integra con EFS y MySQL

@@ -1,30 +1,36 @@
+# Instala el conector Python necesario para que Ansible pueda gestionar MySQL
 - name: Instalar dependencias Python para Ansible + MySQL
   apt:
     name: python3-pymysql
     state: present
 
+# Instala el servidor de base de datos MySQL
 - name: Instalar MySQL Server
   apt:
     name: mysql-server
     state: present
 
+# Asegura que el servicio MySQL esté corriendo y se inicie automáticamente con el sistema
 - name: Asegurar que MySQL está iniciado
   service:
     name: mysql
     state: started
     enabled: yes
 
+# Crea la base de datos que usará WordPress
 - name: Crear base de datos para WordPress
   mysql_db:
-    name: "{{ wp_db_name }}"
+    name: "{{ wp_db_name }}"  # Variable definida en group_vars/all.yml
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
+# Crea un usuario de base de datos con privilegios sobre la base de datos de WordPress
 - name: Crear usuario para WordPress
   community.mysql.mysql_user:
-    name: "{{ wp_db_user }}"
-    password: "{{ wp_db_password }}"
+    name: "{{ wp_db_user }}"        # Nombre del usuario MySQL
+    password: "{{ wp_db_password }}" # Contraseña del usuario
     host: "localhost"
-    priv: "{{ wp_db_name }}.*:ALL"
+    priv: "{{ wp_db_name }}.*:ALL" # Otorga todos los permisos sobre esa base de datos
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
+

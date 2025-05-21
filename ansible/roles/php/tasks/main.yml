@@ -1,18 +1,21 @@
 ---
+# Instalar PHP y módulos requeridos para que WordPress funcione correctamente
 - name: Instalar PHP y módulos requeridos
   apt:
     name:
-      - php
-      - php-fpm
-      - php-mysql
-      - php-curl
-      - php-xml
-      - php-mbstring
+      - php              # Paquete principal de PHP
+      - php-fpm          # PHP-FPM (FastCGI Process Manager), para integrar con Nginx
+      - php-mysql        # Extensión para conectar PHP con MySQL
+      - php-curl         # Soporte para librería CURL (necesaria en muchos plugins)
+      - php-xml          # Manipulación de XML (utilizado por WordPress y plugins)
+      - php-mbstring     # Soporte para strings multibyte (idiomas, caracteres especiales)
     state: present
-    update_cache: true
+    update_cache: true  # Asegura que la lista de paquetes esté actualizada
 
+# Asegurar que el servicio PHP-FPM está iniciado y se inicie automáticamente al arrancar
 - name: Asegurar que PHP-FPM está iniciado y habilitado
   service:
-    name: php{{ php_version }}-fpm
-    state: started
-    enabled: true
+    name: php{{ php_version }}-fpm  # Usa la versión definida en la variable 'php_version'
+    state: started                  # Inicia el servicio si no lo está
+    enabled: true                   # Lo habilita para el arranque del sistema
+

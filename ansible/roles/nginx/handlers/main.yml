@@ -1,4 +1,6 @@
+# Recarga el servicio Nginx (sin reiniciarlo) cuando se le notifique
 - name: Recargar Nginx
   service:
     name: nginx
     state: reloaded
+
