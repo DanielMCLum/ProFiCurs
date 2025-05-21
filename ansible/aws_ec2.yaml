@@ -5,7 +5,7 @@ regions:
 
 filters:
   tag:Name:
-    - wordpress-asg-instance  # Solo incluir instancias con este tag Name en EC2
+    - wordpress-asg-instance  # Solo incluiye instancias con este tag Name en EC2
 
 host_key_checks: False  # Evita errores si cambia la huella SSH del host
 

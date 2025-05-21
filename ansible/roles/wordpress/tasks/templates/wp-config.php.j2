@@ -1,24 +1,35 @@
 <?php
-define( 'DB_NAME', '{{ wp_db_name }}' );
-define( 'DB_USER', '{{ wp_db_user }}' );
-define( 'DB_PASSWORD', '{{ wp_db_password }}' );
-define( 'DB_HOST', 'localhost' );
-define( 'DB_CHARSET', 'utf8' );
-define( 'DB_COLLATE', '' );
+// Configuración de conexión a la base de datos de WordPress
+define( 'DB_NAME', '{{ wp_db_name }}' );         // Nombre de la base de datos
+define( 'DB_USER', '{{ wp_db_user }}' );         // Usuario de la base de datos
+define( 'DB_PASSWORD', '{{ wp_db_password }}' ); // Contraseña del usuario
+define( 'DB_HOST', 'localhost' );                // Host de la base de datos (local en este caso)
+define( 'DB_CHARSET', 'utf8' );                  // Codificación de caracteres
+define( 'DB_COLLATE', '' );                      // Intercalación de la base de datos (vacío por defecto)
 
+// Claves y salts únicas para mejorar la seguridad
+// Se generan dinámicamente durante el aprovisionamiento con Ansible
 {{ wp_salts }}
 
+// Prefijo para las tablas de la base de datos
+// Permite instalar múltiples sitios WordPress en una misma base de datos
 $table_prefix = 'wp_';
 
+// Detección de HTTPS cuando se está detrás de un Load Balancer como el ALB de AWS
+// El ALB reenvía el protocolo original a través del header HTTP_X_FORWARDED_PROTO
 if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' ) {
-    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['HTTPS'] = 'on'; // Obliga a WordPress a tratar la conexión como segura
 }
 
+// Habilita o desactiva el modo de depuración (útil solo para desarrollo)
 define( 'WP_DEBUG', false );
 
+// Define la ruta absoluta al directorio de WordPress si aún no está definida
 if ( ! defined( 'ABSPATH' ) ) {
     define( 'ABSPATH', __DIR__ . '/' );
 }
 
+// Carga los archivos principales de configuración de WordPress
 require_once ABSPATH . 'wp-settings.php';
+
 
