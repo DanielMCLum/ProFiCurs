@@ -1,53 +1,54 @@
-# Asegura que la variable del dominio esté definida
+# Asegura que se haya definido una variable obligatoria: el dominio
 - name: Verificar que la variable 'domain_name' está definida
   assert:
     that:
-      - domain_name is defined
-      - domain_name | length > 0
+      - domain_name is defined       # La variable debe existir
+      - domain_name | length > 0     # ...y no puede estar vacía
     fail_msg: >
       XXX ERROR XXX La variable 'domain_name' no está definida o está vacía.
       Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
 
-# =========================
-# Soporte para EFS (NFS)
-# =========================
+# ---------------------------------------------------------------------
+# Sección: Soporte para EFS (sistema de archivos compartido entre instancias)
+# ---------------------------------------------------------------------
 
-# Instala el cliente NFS necesario para montar EFS
+# Instala soporte NFS, que permite montar volúmenes de red como EFS
 - name: Instalar soporte para NFS (requerido por EFS)
   apt:
-    name: nfs-common
+    name: nfs-common                # Cliente NFS necesario para conectarse a EFS
     state: present
-    update_cache: true
+    update_cache: true             # Actualiza la lista de paquetes antes de instalar
 
-# Asegura que exista el directorio de montaje para EFS
+# Asegura que el directorio donde montaremos EFS exista
 - name: Asegurar que el punto de montaje EFS existe
   file:
-    path: /var/www/html
+    path: /var/www/html            # Directorio raíz de la web
     state: directory
-    mode: '0755'
+    mode: '0755'                   # Permisos típicos: rwxr-xr-x
 
-# Monta el EFS en /var/www/html (donde se alojará WordPress)
+# Monta el sistema de archivos EFS en /var/www/html
 - name: Montar EFS en /var/www/html
   mount:
     path: /var/www/html
-    src: "{{ efs_id }}.efs.{{ aws_region }}.amazonaws.com:/"
-    fstype: nfs4
+    src: "{{ efs_id }}.efs.{{ aws_region }}.amazonaws.com:/"   # DNS de EFS con región dinámica
+    fstype: nfs4                                                # Usamos protocolo NFS versión 4
     opts: "nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
-    state: mounted
+    state: mounted                                              # Se monta de inmediato
 
-# =========================
-# Nodo líder (solo 1 instancia hace instalación completa)
-# =========================
+# ---------------------------------------------------------------------
+# Lógica para instalar WordPress solo en un nodo (el "líder")
+# ---------------------------------------------------------------------
 
-# Define si esta instancia es el nodo líder (la que se encargará de instalar WordPress)
+# Compara los nombres de host de todas las instancias. El primero (ordenado) será el líder.
 - name: Definir si soy el nodo líder
   set_fact:
     is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'] | sort | first }}"
 
-# =========================
-# Instalación de WordPress
-# =========================
+# ---------------------------------------------------------------------
+# Solo el nodo líder descarga e instala WordPress
+# ---------------------------------------------------------------------
 
+# Obtiene claves SALT (únicas) para mayor seguridad en wp-config.php
 - name: Obtener claves SALT únicas
   uri:
     url: https://api.wordpress.org/secret-key/1.1/salt/
@@ -55,28 +56,31 @@
   register: wp_salts_raw
   when: is_leader
 
+# Guarda las claves SALT en una variable para usarlas en la plantilla
 - name: Guardar salts en variable
   set_fact:
     wp_salts: "{{ wp_salts_raw.content }}"
   when: is_leader
 
-# Instala utilidades necesarias para el proceso de descarga/descompresión
+# Instala dependencias necesarias para la descarga, extracción y funcionamiento de WordPress
 - name: Instalar dependencias necesarias
   apt:
     name:
-      - curl
-      - unzip
-      - php-mysql
-      - php-curl
+      - curl         # Descargas desde internet
+      - unzip        # Descomprimir archivos si hiciera falta
+      - php-mysql    # PHP puede hablar con MySQL
+      - php-curl     # PHP puede hacer peticiones HTTP
     state: present
     update_cache: true
 
+# Descarga la última versión de WordPress desde su web oficial
 - name: Descargar WordPress
   get_url:
     url: https://wordpress.org/latest.tar.gz
     dest: /tmp/wordpress.tar.gz
   when: is_leader
 
+# Extrae el archivo .tar.gz descargado en el directorio temporal
 - name: Extraer WordPress
   unarchive:
     src: /tmp/wordpress.tar.gz
@@ -84,7 +88,7 @@
     remote_src: yes
   when: is_leader
 
-# Elimina página de bienvenida de Nginx si existe
+# Borra la página de bienvenida de Nginx si existe
 - name: Eliminar archivo de bienvenida de Nginx si existe
   file:
     path: /var/www/html/index.nginx-debian.html
@@ -92,7 +96,7 @@
   ignore_errors: true
   when: is_leader
 
-# Copia archivos de WordPress a /var/www/html
+# Copia los archivos de WordPress extraídos a /var/www/html (montado por EFS)
 - name: Copiar WordPress a /var/www/html (sobrescribiendo)
   copy:
     src: /tmp/wordpress/
@@ -103,7 +107,7 @@
     remote_src: yes
   when: is_leader
 
-# Asegura permisos correctos en todo el directorio
+# Asegura que todos los archivos tengan los permisos correctos
 - name: Establecer permisos en /var/www/html
   file:
     path: /var/www/html
@@ -112,7 +116,7 @@
     recurse: yes
   when: is_leader
 
-# Genera el archivo wp-config.php a partir de plantilla
+# Crea el archivo de configuración principal de WordPress desde plantilla
 - name: Plantilla de wp-config.php
   template:
     src: wp-config.php.j2
@@ -121,21 +125,24 @@
     group: www-data
     mode: '0644'
   when: is_leader
-  notify: Recargar Nginx
+  notify: Recargar Nginx   # Se ejecuta si cambia el archivo para aplicar cambios
 
-# =========================
-# Instalación de WP-CLI
-# =========================
+# ---------------------------------------------------------------------
+# Instalación de WP-CLI (línea de comandos para WordPress)
+# ---------------------------------------------------------------------
 
+# Descarga el archivo ejecutable wp-cli.phar
 - name: Descargar WP-CLI
   get_url:
     url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
     dest: /usr/local/bin/wp-cli.phar
     mode: '0755'
 
+# Lo copia al path del sistema como "wp"
 - name: Mover WP-CLI a /usr/local/bin/wp
   copy:
     src: /usr/local/bin/wp-cli.phar
     dest: /usr/local/bin/wp
     remote_src: yes
     mode: '0755'
+
