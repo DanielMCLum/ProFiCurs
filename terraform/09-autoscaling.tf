@@ -79,7 +79,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   }
   alarm_actions = [aws_autoscaling_policy.scale_out.arn]
 }
-
+/*
 # --------------------------------------------
 # POLÍTICA DE ESCALADO HACIA ABAJO
 # --------------------------------------------
@@ -108,3 +108,4 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   }
   alarm_actions = [aws_autoscaling_policy.scale_in.arn]
 }
+*/

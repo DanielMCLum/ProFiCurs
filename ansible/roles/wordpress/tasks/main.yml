@@ -1,6 +1,4 @@
-# ---------------------------------------------------------------------
 # Verifica que la variable del dominio esté definida
-# ---------------------------------------------------------------------
 - name: Verificar que la variable 'domain_name' está definida
   assert:
     that:
@@ -11,7 +9,7 @@
       Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
 
 # ---------------------------------------------------------------------
-# Soporte para EFS (montaje compartido entre instancias EC2)
+# Sección: Soporte para EFS (sistema de archivos compartido entre instancias)
 # ---------------------------------------------------------------------
 
 - name: Instalar soporte para NFS (requerido por EFS)
@@ -35,24 +33,17 @@
     state: mounted
 
 # ---------------------------------------------------------------------
-# Detección de instalación previa en EFS (por existencia de wp-content)
+# Detección de instalación previa en EFS
 # ---------------------------------------------------------------------
 
 - name: Comprobar si WordPress ya está instalado
   stat:
-    path: /var/www/html/wp-content
+    path: /var/www/html/wp-config.php
   register: wp_installed
 
 # ---------------------------------------------------------------------
-# Instalación de WordPress SOLO si no existe en EFS
+# Descargar e instalar WordPress SOLO si no está en EFS
 # ---------------------------------------------------------------------
-
-- name: Instalar rsync si no está presente
-  apt:
-    name: rsync
-    state: present
-    update_cache: true
-  when: not wp_installed.stat.exists
 
 - name: Obtener claves SALT únicas
   uri:
@@ -97,14 +88,11 @@
   ignore_errors: true
   when: not wp_installed.stat.exists
 
-- name: Copiar WordPress a /var/www/html usando rsync
-  synchronize:
-    src: /tmp/wordpress/
-    dest: /var/www/html/
-    recursive: yes
-    delete: no
-    rsync_opts:
-      - "--chown=www-data:www-data"
+# NUEVA VERSIÓN: rsync ejecutado directamente en el host remoto
+- name: Copiar WordPress a /var/www/html usando rsync desde el propio host
+  ansible.builtin.command: >
+    rsync -a /tmp/wordpress/ /var/www/html/ --chown=www-data:www-data
+  become: true
   when: not wp_installed.stat.exists
 
 - name: Establecer permisos en /var/www/html
@@ -126,7 +114,7 @@
   notify: Recargar Nginx
 
 # ---------------------------------------------------------------------
-# Instalación de WP-CLI (línea de comandos de WordPress)
+# Instalación de WP-CLI (se ejecuta siempre)
 # ---------------------------------------------------------------------
 
 - name: Descargar WP-CLI
