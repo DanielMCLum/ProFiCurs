@@ -2,7 +2,7 @@
 # Backup Automático para EFS (No habilitado)
 # ============================================
 
-# ⚠️ Comentado porque las cuentas con permisos limitados (como AWS Educate o voclabs)
+# Comentado porque las cuentas con permisos limitados (como AWS Educate o voclabs)
 # no permiten crear roles IAM necesarios para ejecutar AWS Backup desde Terraform.
 # Cuando se tenga una cuenta personal con permisos completos, se podrá descomentar.
 

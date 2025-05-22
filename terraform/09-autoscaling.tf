@@ -1,68 +1,110 @@
-# ------------------------------------------------------------------------------
-# CLOUDWATCH ALARM: CPU > 80% => ESCALAR HACIA ARRIBA
-# ------------------------------------------------------------------------------
+# --------------------------------------------
+# PLANTILLA DE LANZAMIENTO PARA INSTANCIAS EC2
+# --------------------------------------------
+resource "aws_launch_template" "wordpress" {
+  name_prefix   = "wordpress-launch-"
+  image_id      = var.ami_id                          # AMI a usar
+  instance_type = var.instance_type                  # Tipo de instancia EC2
+  key_name      = aws_key_pair.deployer.key_name     # Clave SSH para conexión
 
-resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "cpu-high-alarm"  # Nombre descriptivo para la alarma
-  comparison_operator = "GreaterThanThreshold"  # Dispara si el valor es mayor al umbral
-  evaluation_periods  = 2                # Número de períodos consecutivos evaluados
-  metric_name         = "CPUUtilization" # Métrica de CPU de las instancias EC2
-  namespace           = "AWS/EC2"        # Namespace correspondiente a EC2
-  period              = 60               # Duración de cada período (en segundos)
-  statistic           = "Average"        # Usa el promedio de CPU
-  threshold           = 80               # Umbral: 80% de CPU
-  alarm_description   = "Escala si CPU > 80%" # Descripción de la alarma
-
-  dimensions = {
-    AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
-    # Relaciona la métrica con el grupo de autoescalado
+  network_interfaces {
+    associate_public_ip_address = true               # Obtener IP pública automáticamente
+    security_groups             = [aws_security_group.wordpress_sg.id]  # Grupo de seguridad
   }
 
-  alarm_actions = [
-    aws_autoscaling_policy.scale_out.arn
-    # Qué hacer si se dispara: invocar política de escalar hacia arriba
-  ]
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "wordpress-asg"                         # Nombre visible en consola AWS
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true                     # Evita tiempo sin disponibilidad
+  }
 }
 
+# --------------------------------------------
+# AUTO SCALING GROUP (ASG)
+# --------------------------------------------
+resource "aws_autoscaling_group" "wordpress_asg" {
+  desired_capacity     = 2                           # Número inicial de instancias
+  max_size             = 4                           # Máximo de instancias permitidas
+  min_size             = 1                           # Mínimo de instancias funcionando
+  vpc_zone_identifier  = data.aws_subnets.default.ids # Subredes donde puede lanzar instancias
+  health_check_type    = "ELB"                        # Tipo de chequeo (con ALB)
+  target_group_arns    = [aws_lb_target_group.wordpress_tg.arn]  # Grupo del ALB
+
+  launch_template {
+    id      = aws_launch_template.wordpress.id       # Plantilla de lanzamiento
+    version = "$Latest"
+  }
+
+  tag {
+    key                 = "Name"
+    value               = "wordpress-asg-instance"
+    propagate_at_launch = true                       # Aplica el tag a cada instancia
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# --------------------------------------------
+# POLÍTICA DE AUTO ESCALADO HACIA ARRIBA
+# --------------------------------------------
 resource "aws_autoscaling_policy" "scale_out" {
-  name                   = "scale-out-policy"              # Nombre de la política
-  policy_type            = "SimpleScaling"                 # Tipo de política simple
-  scaling_adjustment     = 1                               # Aumentar 1 instancia
-  adjustment_type        = "ChangeInCapacity"              # Cambiar cantidad de instancias
-  cooldown               = 300                             # Esperar 5 minutos antes de volver a escalar
-  autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name  # Grupo al que aplica
+  name                   = "scale-out-policy"
+  policy_type            = "SimpleScaling"
+  scaling_adjustment     = 1                         # Aumentar 1 instancia
+  adjustment_type        = "ChangeInCapacity"
+  cooldown               = 300                       # Tiempo de espera antes de aplicar otro cambio
+  autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name
 }
 
-# ------------------------------------------------------------------------------
-# CLOUDWATCH ALARM: CPU < 50% => ESCALAR HACIA ABAJO
-# ------------------------------------------------------------------------------
-
-resource "aws_cloudwatch_metric_alarm" "cpu_low" {
-  alarm_name          = "cpu-low-alarm"   # Nombre de la alarma
-  comparison_operator = "LessThanThreshold" # Dispara si es menor al umbral
+# ALARMA CLOUDWATCH PARA ESCALAR HACIA ARRIBA (CPU > 80%)
+resource "aws_cloudwatch_metric_alarm" "cpu_high" {
+  alarm_name          = "cpu-high"
+  comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 60
+  period              = 120
   statistic           = "Average"
-  threshold           = 50               # Umbral: 50% de CPU
-  alarm_description   = "Reduce si CPU < 50%"
-
+  threshold           = 80                           # Si supera el 80%
+  alarm_description   = "CPU usage too high - scale out"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
   }
-
-  alarm_actions = [
-    aws_autoscaling_policy.scale_in.arn
-    # Acción: ejecutar la política que reduce instancias
-  ]
+  alarm_actions = [aws_autoscaling_policy.scale_out.arn]
 }
 
+# --------------------------------------------
+# POLÍTICA DE ESCALADO HACIA ABAJO
+# --------------------------------------------
 resource "aws_autoscaling_policy" "scale_in" {
   name                   = "scale-in-policy"
   policy_type            = "SimpleScaling"
-  scaling_adjustment     = -1                # Reducir en 1 instancia
+  scaling_adjustment     = -1                        # Reducir 1 instancia
   adjustment_type        = "ChangeInCapacity"
   cooldown               = 300
   autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name
+}
+
+# ALARMA CLOUDWATCH PARA ESCALAR HACIA ABAJO (CPU < 50%)
+resource "aws_cloudwatch_metric_alarm" "cpu_low" {
+  alarm_name          = "cpu-low"
+  comparison_operator = "LessThanThreshold"
+  evaluation_periods  = 2
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = 120
+  statistic           = "Average"
+  threshold           = 50                           # Si baja del 50%
+  alarm_description   = "CPU usage low - scale in"
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
+  }
+  alarm_actions = [aws_autoscaling_policy.scale_in.arn]
 }

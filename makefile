@@ -34,8 +34,11 @@ inventory:
 	@./generate_inventory.sh
 
 # Ejecuta Ansible usando inventario dinámico (aws_ec2.yaml definido en ansible.cfg)
+# Y usando el entorno virtual
 ansible:
-	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook $(ANSIBLE_DIR)/playbook.yml
+	. .venv/bin/activate && \
+	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(ANSIBLE_DIR)/aws_ec2.yaml $(ANSIBLE_DIR)/playbook.yml
+
 
 # Alternativa sin reinicializar
 deploy:

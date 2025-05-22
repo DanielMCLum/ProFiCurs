@@ -1,122 +1,120 @@
-# Asegura que se haya definido una variable obligatoria: el dominio
+# ---------------------------------------------------------------------
+# Verifica que la variable del dominio esté definida
+# ---------------------------------------------------------------------
 - name: Verificar que la variable 'domain_name' está definida
   assert:
     that:
-      - domain_name is defined       # La variable debe existir
-      - domain_name | length > 0     # ...y no puede estar vacía
+      - domain_name is defined
+      - domain_name | length > 0
     fail_msg: >
       XXX ERROR XXX La variable 'domain_name' no está definida o está vacía.
       Asegúrate de establecerla en group_vars/all.yml (ej. domain_name: www.midominio.com).
 
 # ---------------------------------------------------------------------
-# Sección: Soporte para EFS (sistema de archivos compartido entre instancias)
+# Soporte para EFS (montaje compartido entre instancias EC2)
 # ---------------------------------------------------------------------
 
-# Instala soporte NFS, que permite montar volúmenes de red como EFS
 - name: Instalar soporte para NFS (requerido por EFS)
   apt:
-    name: nfs-common                # Cliente NFS necesario para conectarse a EFS
+    name: nfs-common
     state: present
-    update_cache: true             # Actualiza la lista de paquetes antes de instalar
+    update_cache: true
 
-# Asegura que el directorio donde montaremos EFS exista
 - name: Asegurar que el punto de montaje EFS existe
   file:
-    path: /var/www/html            # Directorio raíz de la web
+    path: /var/www/html
     state: directory
-    mode: '0755'                   # Permisos típicos: rwxr-xr-x
+    mode: '0755'
 
-# Monta el sistema de archivos EFS en /var/www/html
 - name: Montar EFS en /var/www/html
   mount:
     path: /var/www/html
-    src: "{{ efs_id }}.efs.{{ aws_region }}.amazonaws.com:/"   # DNS de EFS con región dinámica
-    fstype: nfs4                                                # Usamos protocolo NFS versión 4
+    src: "{{ efs_id }}.efs.{{ aws_region }}.amazonaws.com:/"
+    fstype: nfs4
     opts: "nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
-    state: mounted                                              # Se monta de inmediato
+    state: mounted
 
 # ---------------------------------------------------------------------
-# Lógica para instalar WordPress solo en un nodo (el "líder")
+# Detección de instalación previa en EFS (por existencia de wp-content)
 # ---------------------------------------------------------------------
 
-# Compara los nombres de host de todas las instancias. El primero (ordenado) será el líder.
-- name: Definir si soy el nodo líder
-  set_fact:
-    is_leader: "{{ inventory_hostname == groups['tag_wordpress_asg_instance'] | sort | first }}"
+- name: Comprobar si WordPress ya está instalado
+  stat:
+    path: /var/www/html/wp-content
+  register: wp_installed
 
 # ---------------------------------------------------------------------
-# Solo el nodo líder descarga e instala WordPress
+# Instalación de WordPress SOLO si no existe en EFS
 # ---------------------------------------------------------------------
 
-# Obtiene claves SALT (únicas) para mayor seguridad en wp-config.php
+- name: Instalar rsync si no está presente
+  apt:
+    name: rsync
+    state: present
+    update_cache: true
+  when: not wp_installed.stat.exists
+
 - name: Obtener claves SALT únicas
   uri:
     url: https://api.wordpress.org/secret-key/1.1/salt/
     return_content: yes
   register: wp_salts_raw
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Guarda las claves SALT en una variable para usarlas en la plantilla
 - name: Guardar salts en variable
   set_fact:
     wp_salts: "{{ wp_salts_raw.content }}"
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Instala dependencias necesarias para la descarga, extracción y funcionamiento de WordPress
 - name: Instalar dependencias necesarias
   apt:
     name:
-      - curl         # Descargas desde internet
-      - unzip        # Descomprimir archivos si hiciera falta
-      - php-mysql    # PHP puede hablar con MySQL
-      - php-curl     # PHP puede hacer peticiones HTTP
+      - curl
+      - unzip
+      - php-mysql
+      - php-curl
     state: present
     update_cache: true
+  when: not wp_installed.stat.exists
 
-# Descarga la última versión de WordPress desde su web oficial
 - name: Descargar WordPress
   get_url:
     url: https://wordpress.org/latest.tar.gz
     dest: /tmp/wordpress.tar.gz
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Extrae el archivo .tar.gz descargado en el directorio temporal
 - name: Extraer WordPress
   unarchive:
     src: /tmp/wordpress.tar.gz
     dest: /tmp
     remote_src: yes
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Borra la página de bienvenida de Nginx si existe
 - name: Eliminar archivo de bienvenida de Nginx si existe
   file:
     path: /var/www/html/index.nginx-debian.html
     state: absent
   ignore_errors: true
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Copia los archivos de WordPress extraídos a /var/www/html (montado por EFS)
-- name: Copiar WordPress a /var/www/html (sobrescribiendo)
-  copy:
+- name: Copiar WordPress a /var/www/html usando rsync
+  synchronize:
     src: /tmp/wordpress/
     dest: /var/www/html/
-    owner: www-data
-    group: www-data
-    mode: '0755'
-    remote_src: yes
-  when: is_leader
+    recursive: yes
+    delete: no
+    rsync_opts:
+      - "--chown=www-data:www-data"
+  when: not wp_installed.stat.exists
 
-# Asegura que todos los archivos tengan los permisos correctos
 - name: Establecer permisos en /var/www/html
   file:
     path: /var/www/html
     owner: www-data
     group: www-data
     recurse: yes
-  when: is_leader
+  when: not wp_installed.stat.exists
 
-# Crea el archivo de configuración principal de WordPress desde plantilla
 - name: Plantilla de wp-config.php
   template:
     src: wp-config.php.j2
@@ -124,25 +122,22 @@
     owner: www-data
     group: www-data
     mode: '0644'
-  when: is_leader
-  notify: Recargar Nginx   # Se ejecuta si cambia el archivo para aplicar cambios
+  when: not wp_installed.stat.exists
+  notify: Recargar Nginx
 
 # ---------------------------------------------------------------------
-# Instalación de WP-CLI (línea de comandos para WordPress)
+# Instalación de WP-CLI (línea de comandos de WordPress)
 # ---------------------------------------------------------------------
 
-# Descarga el archivo ejecutable wp-cli.phar
 - name: Descargar WP-CLI
   get_url:
     url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
     dest: /usr/local/bin/wp-cli.phar
     mode: '0755'
 
-# Lo copia al path del sistema como "wp"
 - name: Mover WP-CLI a /usr/local/bin/wp
   copy:
     src: /usr/local/bin/wp-cli.phar
     dest: /usr/local/bin/wp
     remote_src: yes
     mode: '0755'
-
