@@ -14,7 +14,7 @@ else
   echo -e "\nefs_id: ${EFS_ID}" >> "$GROUP_VARS_FILE"
 fi
 
-echo "✅ EFS ID actualizado en: ${GROUP_VARS_FILE}"
+echo "EFS ID actualizado en: ${GROUP_VARS_FILE}"
 
 
 
