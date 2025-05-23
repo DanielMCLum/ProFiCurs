@@ -1,3 +1,8 @@
+variable "aws_region" {
+  description = "Region AWS para desplegar recursos."
+  default     = "us-east-1" # Norte de Virginia
+}
+
 variable "key_name" {
   default = "devops"
 }

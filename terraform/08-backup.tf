@@ -30,22 +30,24 @@
 #   }
 # }
 
-# resource "aws_iam_role" "backup_role" {
-#   name = "aws-backup-role"
+/*
+resource "aws_iam_role" "backup_role" {
+  name = "aws-backup-role"  # Nombre del rol que estamos creando
 
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17",
-#     Statement = [
-#       {
-#         Effect = "Allow",
-#         Principal = {
-#           Service = "backup.amazonaws.com"
-#         },
-#         Action = "sts:AssumeRole"
-#       }
-#     ]
-#   })
-# }
+  assume_role_policy = jsonencode({     # Política que dice QUIÉN puede "asumir" este rol
+    Version = "2012-10-17",             # Versión del documento
+    Statement = [                       # Lista de reglas de acceso
+      {
+        Effect = "Allow",               # Permitir
+        Principal = {                  # Quién puede usar este rol
+          Service = "backup.amazonaws.com"  # El servicio AWS Backup
+        },
+        Action = "sts:AssumeRole"      # Acción que se permite: asumir este rol
+      }
+    ]
+  })
+}
+*/
 
 # resource "aws_iam_role_policy_attachment" "backup_role_policy" {
 #   role       = aws_iam_role.backup_role.name

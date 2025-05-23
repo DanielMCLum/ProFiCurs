@@ -18,7 +18,7 @@
     state: present
     update_cache: true
 
-- name: Asegurar que el punto de montaje EFS existe
+- name: Crear directorio de montaje si no existe
   file:
     path: /var/www/html
     state: directory
@@ -31,6 +31,12 @@
     fstype: nfs4
     opts: "nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2"
     state: mounted
+
+- name: Esperar a que el punto de montaje EFS esté disponible
+  wait_for:
+    path: /var/www/html
+    state: present
+    timeout: 60
 
 # ---------------------------------------------------------------------
 # Detección de instalación previa en EFS
@@ -88,11 +94,9 @@
   ignore_errors: true
   when: not wp_installed.stat.exists
 
-# NUEVA VERSIÓN: rsync ejecutado directamente en el host remoto
-- name: Copiar WordPress a /var/www/html usando rsync desde el propio host
-  ansible.builtin.command: >
-    rsync -a /tmp/wordpress/ /var/www/html/ --chown=www-data:www-data
-  become: true
+- name: Copiar WordPress a /var/www/html usando rsync
+  ansible.builtin.command:
+    cmd: rsync -a /tmp/wordpress/ /var/www/html/
   when: not wp_installed.stat.exists
 
 - name: Establecer permisos en /var/www/html

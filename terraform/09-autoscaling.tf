@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "wordpress_asg" {
     create_before_destroy = true
   }
 }
-
+/*
 # --------------------------------------------
 # POLÍTICA DE AUTO ESCALADO HACIA ARRIBA
 # --------------------------------------------
@@ -72,13 +72,15 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 80                           # Si supera el 80%
-  alarm_description   = "CPU usage too high - scale out"
+  threshold           = 85                           # Si supera el 85%
+  alarm_description   = "Uso de CPU elevado - Escalando"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
   }
   alarm_actions = [aws_autoscaling_policy.scale_out.arn]
 }
+*/
+
 /*
 # --------------------------------------------
 # POLÍTICA DE ESCALADO HACIA ABAJO
@@ -101,8 +103,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 50                           # Si baja del 50%
-  alarm_description   = "CPU usage low - scale in"
+  threshold           = 20                           # Si baja del 20%
+  alarm_description   = "Uso del CPU bajo - Disminuyendo instancias"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
   }
