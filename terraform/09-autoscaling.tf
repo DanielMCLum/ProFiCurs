@@ -29,8 +29,8 @@ resource "aws_launch_template" "wordpress" {
 # --------------------------------------------
 resource "aws_autoscaling_group" "wordpress_asg" {
   desired_capacity     = 2                           # Número inicial de instancias
-  max_size             = 4                           # Máximo de instancias permitidas
-  min_size             = 1                           # Mínimo de instancias funcionando
+  max_size             = 3                           # Máximo de instancias permitidas
+  min_size             = 2                           # Mínimo de instancias funcionando
   vpc_zone_identifier  = data.aws_subnets.default.ids # Subredes donde puede lanzar instancias
   health_check_type    = "ELB"                        # Tipo de chequeo (con ALB)
   target_group_arns    = [aws_lb_target_group.wordpress_tg.arn]  # Grupo del ALB
@@ -50,7 +50,7 @@ resource "aws_autoscaling_group" "wordpress_asg" {
     create_before_destroy = true
   }
 }
-/*
+
 # --------------------------------------------
 # POLÍTICA DE AUTO ESCALADO HACIA ARRIBA
 # --------------------------------------------
@@ -59,7 +59,7 @@ resource "aws_autoscaling_policy" "scale_out" {
   policy_type            = "SimpleScaling"
   scaling_adjustment     = 1                         # Aumentar 1 instancia
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300                       # Tiempo de espera antes de aplicar otro cambio
+  cooldown               = 1200                       # Tiempo de espera antes de aplicar otro cambio
   autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name
 }
 
@@ -72,14 +72,14 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 85                           # Si supera el 85%
+  threshold           = 90                           # Si supera el 85%
   alarm_description   = "Uso de CPU elevado - Escalando"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
   }
   alarm_actions = [aws_autoscaling_policy.scale_out.arn]
 }
-*/
+
 
 /*
 # --------------------------------------------
