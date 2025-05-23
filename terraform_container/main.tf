@@ -1,3 +1,22 @@
+# ==================================================
+# DESPLIEGUE DE WORDPRESS EN AZURE CONTAINER APPS
+# Y MYSQL FLEXIBLE SERVER
+# ==================================================
+# Autor: Rubén Daniel Moreno Castellanos
+# Fecha: 23/05/2025
+# Versión: 1.0
+# 
+# Este módulo Terraform implementa:
+# 1. Una infraestructura aislada en VNET con subredes dedicadas
+# 2. MySQL Flexible Server con DNS privado
+# 3. WordPress en Azure Container Apps con autoescalado
+# ==================================================
+
+
+# --------------------------------------------------
+# MÓDULO 1: RECURSOS BÁSICOS
+# --------------------------------------------------
+
 # === SUFIJO ALEATORIO PARA MYSQL ===
 resource "random_string" "mysql_suffix" {
   length  = 6
@@ -10,6 +29,11 @@ resource "azurerm_resource_group" "wp_rg" {
   name     = var.resource_group_name
   location = var.location
 }
+
+# --------------------------------------------------
+# MÓDULO 2: REDES Y CONECTIVIDAD
+# --------------------------------------------------
+
 
 # === VNET Y SUBREDES ===
 resource "azurerm_virtual_network" "wp_vnet" {
@@ -47,6 +71,7 @@ resource "azurerm_private_dns_zone" "mysql" {
   resource_group_name = azurerm_resource_group.wp_rg.name
 }
 
+# === Vinculación DNS-VNET ===
 resource "azurerm_private_dns_zone_virtual_network_link" "mysql_link" {
   name                  = "mysql-dns-link"
   resource_group_name   = azurerm_resource_group.wp_rg.name
@@ -54,6 +79,10 @@ resource "azurerm_private_dns_zone_virtual_network_link" "mysql_link" {
   virtual_network_id    = azurerm_virtual_network.wp_vnet.id
   registration_enabled  = false
 }
+
+# --------------------------------------------------
+# MÓDULO 3: MONITOREO
+# --------------------------------------------------
 
 # === LOG ANALYTICS PARA CONTAINER APPS ===
 resource "azurerm_log_analytics_workspace" "wp_log" {
@@ -64,6 +93,10 @@ resource "azurerm_log_analytics_workspace" "wp_log" {
   retention_in_days   = 30
 }
 
+# --------------------------------------------------
+# MÓDULO 4: CONTAINER APPS ENVIRONMENT
+# --------------------------------------------------
+
 # === ENTORNO CON VNET INTEGRADA PARA CONTAINER APPS ===
 resource "azurerm_container_app_environment" "wp_env" {
   name                        = "${var.prefix}-env"
@@ -73,6 +106,10 @@ resource "azurerm_container_app_environment" "wp_env" {
   infrastructure_subnet_id    = azurerm_subnet.apps_subnet.id
   internal_load_balancer_enabled = false
 }
+
+# --------------------------------------------------
+# MÓDULO 5: BASE DE DATOS MYSQL
+# --------------------------------------------------
 
 # === MYSQL FLEXIBLE SERVER ===
 resource "azurerm_mysql_flexible_server" "wp_mysql" {
@@ -104,6 +141,7 @@ resource "azurerm_mysql_flexible_server_configuration" "disable_ssl" {
   value               = "OFF"
 }
 
+# Base de datos para WordPress
 resource "azurerm_mysql_flexible_database" "wp_database" {
   name                = "wordpress"
   resource_group_name = azurerm_resource_group.wp_rg.name
@@ -111,6 +149,10 @@ resource "azurerm_mysql_flexible_database" "wp_database" {
   charset             = "utf8mb4"
   collation           = "utf8mb4_unicode_ci"
 }
+
+# --------------------------------------------------
+# MÓDULO 6: APLICACIÓN WORDPRESS
+# --------------------------------------------------
 
 # === CONTAINER APP: WORDPRESS ===
 resource "azurerm_container_app" "wp_app" {
@@ -144,6 +186,7 @@ resource "azurerm_container_app" "wp_app" {
       }
     }
 
+ # Configuración de autoescalado
     min_replicas = 1
     max_replicas = 3
 
@@ -158,6 +201,7 @@ resource "azurerm_container_app" "wp_app" {
     }
   }
 
+# Configuración de entrada (ingress)
   ingress {
     external_enabled = true
     target_port      = 80
@@ -169,6 +213,7 @@ resource "azurerm_container_app" "wp_app" {
     }
   }
 
+# Dependencias explícitas
   depends_on = [
     azurerm_mysql_flexible_server.wp_mysql
   ]
