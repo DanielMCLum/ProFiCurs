@@ -1,7 +1,8 @@
-/*
+/* # Comentado la creación de instancias porque ya lo hace el ASG (AutoScalingGroup)
+
 # Crea x instancias EC2 para alojar WordPress
 resource "aws_instance" "wordpress" {
-  count                       = 2                                       # Crea 2 instancias (wordpress-0 y wordpress-1)
+  count                       = 2                                       # Crea 2 instancias (con etiqueta: wordpress-0 y wordpress-1). Puede ser X instancias (wordpress-x)
   ami                         = var.ami_id                              # ID de la imagen (AMI) a usar (definida en variables.tf)
   instance_type               = var.instance_type                       # Tipo de instancia (ej. t2.micro)
   key_name                    = aws_key_pair.deployer.key_name          # Asocia la clave SSH generada previamente

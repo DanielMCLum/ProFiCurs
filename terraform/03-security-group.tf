@@ -1,7 +1,7 @@
 # Crea un grupo de seguridad que permitirá el tráfico necesario para WordPress
 resource "aws_security_group" "wordpress_sg" {
   name        = "wordpress-sg"                            # Nombre del Security Group
-  description = "Allow SSH, HTTP, and HTTPS"              # Descripción para identificar su propósito
+  description = "Permite SSH, HTTP, and HTTPS"              # Descripción para identificar su propósito
   vpc_id      = data.aws_vpc.default.id                   # Asocia el SG a la VPC por defecto de AWS
 
   # Reglas de entrada (ingress)

@@ -29,10 +29,10 @@ resource "aws_launch_template" "wordpress" {
 # --------------------------------------------
 resource "aws_autoscaling_group" "wordpress_asg" {
   desired_capacity     = 2                           # Número inicial de instancias
-  max_size             = 3                           # Máximo de instancias permitidas
+  max_size             = 4                           # Máximo de instancias permitidas
   min_size             = 2                           # Mínimo de instancias funcionando
   vpc_zone_identifier  = data.aws_subnets.default.ids # Subredes donde puede lanzar instancias
-  health_check_type    = "ELB"                        # Tipo de chequeo (con ALB)
+  health_check_type    = "ELB"                        # Tipo de chequeo (con ALB). Esto le dice al ASG que use los chequeos del balanceador de carga
   target_group_arns    = [aws_lb_target_group.wordpress_tg.arn]  # Grupo del ALB
 
   launch_template {
@@ -81,7 +81,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
 }
 
 
-/*
+
 # --------------------------------------------
 # POLÍTICA DE ESCALADO HACIA ABAJO
 # --------------------------------------------
@@ -110,4 +110,4 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   }
   alarm_actions = [aws_autoscaling_policy.scale_in.arn]
 }
-*/
+
