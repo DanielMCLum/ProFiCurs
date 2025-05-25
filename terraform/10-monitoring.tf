@@ -9,7 +9,7 @@ resource "aws_sns_topic" "alarm_notifications" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.alarm_notifications.arn
   protocol  = "email"
-  endpoint  = "danimclum@gmail.com"  # Cambia por tu email si lo deseas
+  endpoint  = "9797ricardo.ramonpita@gmail.com" # danimclum@gmail.com"
 }
 
 # ========================================
