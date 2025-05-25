@@ -9,7 +9,7 @@ resource "aws_sns_topic" "alarm_notifications" {
 resource "aws_sns_topic_subscription" "email_subscription" {
   topic_arn = aws_sns_topic.alarm_notifications.arn
   protocol  = "email"
-  endpoint  = "9797ricardo.ramonpita@gmail.com" # danimclum@gmail.com"
+  endpoint  = "ricardo.ramonpita@gmail.com" # "danimclum@gmail.com"
 }
 
 # ========================================
@@ -17,14 +17,14 @@ resource "aws_sns_topic_subscription" "email_subscription" {
 # ========================================
 
 resource "aws_cloudwatch_metric_alarm" "asg_cpu_high" {
-  alarm_name          = "ASG-CPU-High"
+  alarm_name          = "NOTIFICACION-CPU-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 3
+  evaluation_periods  = 2
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 80
+  threshold           = 80 # Umbral
   alarm_description   = "CPU media del Auto Scaling Group > 80% durante 6 minutos"
   
   dimensions = {
@@ -35,20 +35,20 @@ resource "aws_cloudwatch_metric_alarm" "asg_cpu_high" {
 }
 
 # ========================================
-# CloudWatch Alarm - NetworkIn
+# CloudWatch Alarm - Tráfico de red entrante alto (NetworkIn)
 # ========================================
 
 resource "aws_cloudwatch_metric_alarm" "asg_network_in_high" {
-  alarm_name          = "ASG-NetworkIn-High"
+  alarm_name          = "NOTIFICACION-RED-ENTRANTE-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 3
+  evaluation_periods  = 2
   metric_name         = "NetworkIn"
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 10000000 # 10 MB cada 2 minutos
+  threshold           = 10000000 # Umbral de 10 MB cada 2 minutos
   unit                = "Bytes"
-  alarm_description   = "Red entrante alta en promedio del grupo"
+  alarm_description   = "Red entrante alta en promedio del ASG"
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
@@ -58,18 +58,18 @@ resource "aws_cloudwatch_metric_alarm" "asg_network_in_high" {
 }
 
 # ========================================
-# CloudWatch Alarm - NetworkOut
+# CloudWatch Alarm - Tráfico de red saliente alto (NetworkOut)
 # ========================================
 
 resource "aws_cloudwatch_metric_alarm" "asg_network_out_high" {
-  alarm_name          = "ASG-NetworkOut-High"
+  alarm_name          = "NOTIFICACION-RED-SALIENTE-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 3
+  evaluation_periods  = 2
   metric_name         = "NetworkOut"
   namespace           = "AWS/EC2"
   period              = 120
   statistic           = "Average"
-  threshold           = 10000000
+  threshold           = 10000000 # 10 MB por periodo
   unit                = "Bytes"
   alarm_description   = "Red saliente alta en promedio del grupo"
 
@@ -79,53 +79,3 @@ resource "aws_cloudwatch_metric_alarm" "asg_network_out_high" {
 
   alarm_actions = [aws_sns_topic.alarm_notifications.arn]
 }
-
-
-
-/*
-############## PARA EC2 fijas #####################
-# SNS Topic para enviar notificaciones
-resource "aws_sns_topic" "alarm_notifications" {
-  name = "ec2-monitoring-alerts"
-}
-
-# Suscripción por email
-resource "aws_sns_topic_subscription" "email_subscription" {
-  topic_arn = aws_sns_topic.alarm_notifications.arn
-  protocol  = "email"
-  endpoint  = "danimclum@gmail.com"  # Recibirás un email para confirmar esta suscripción
-}
-
-# Monitorear uso de CPU alto por instancia
-resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  for_each = aws_instance.wordpress  # Solo si estas instancias existen
-  alarm_name          = "CPUHigh-${each.value.tags["Name"]}"
-  comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 5
-  metric_name         = "CPUUtilization"
-  namespace           = "AWS/EC2"
-  period              = 60
-  statistic           = "Average"
-  threshold           = 80
-  alarm_description   = "CPU > 80% durante 5 min"
-  dimensions = {
-    InstanceId = each.value.id
-  }
-  alarm_actions = [aws_sns_topic.alarm_notifications.arn]
-}
-
-# Monitorear tráfico de red entrante
-resource "aws_cloudwatch_metric_alarm" "network_in_high" {
-  for_each = aws_instance.wordpress
-  alarm_name = "NetInHigh-${each.value.tags["Name"]}"
-  ...
-}
-
-# Monitorear tráfico de red saliente
-resource "aws_cloudwatch_metric_alarm" "network_out_high" {
-  for_each = aws_instance.wordpress
-  alarm_name = "NetOutHigh-${each.value.tags["Name"]}"
-  ...
-}
-
-*/
