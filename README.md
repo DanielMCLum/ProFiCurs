@@ -129,11 +129,10 @@ Este proyecto ha sido desarrollado como parte del módulo de Proyecto Final del 
 Puedes consultar libremente el código, estructura y configuraciones de este repositorio con fines **educativos o de aprendizaje personal**.
 
 ### Reutilización del código
-Si deseas reutilizar parte del código, adaptar este proyecto para otro entorno o incluirlo en tu propio trabajo.
+deseas reutilizar parte del código, adaptar este proyecto para otro entorno o incluirlo en tu propio trabajo.
 
 Esto ayuda a preservar la originalidad de los proyectos académicos y a fomentar un uso ético del conocimiento compartido.
 
----
 
 ### Aviso legal
 
@@ -144,6 +143,7 @@ Cualquier uso no autorizado para comercialización será considerado una infracc
 
 ---
 Proyecto Final ASIX · 2025 · INS PROVENÇANA
+
 Todos los derechos reservados.  
 
 **Copyright © 2025**
