@@ -92,7 +92,7 @@ Se incluyen alarmas y políticas:
 
 Todo configurado por Terraform y verificado con CloudWatch
 
----
+
 
 ## 📬 Alertas por email
 Recibirás correos si:
@@ -103,7 +103,7 @@ Recibirás correos si:
 
 Todo configurable en `10-monitoring.tf`
 
----
+
 
 ## Estado actual
 * Infraestructura reproducible
@@ -119,7 +119,7 @@ Todo configurable en `10-monitoring.tf`
 * Documentación paso a paso
 
 
----
+
 
 ## Licencia y condiciones de uso
 
