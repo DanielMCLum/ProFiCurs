@@ -30,7 +30,7 @@ proyecto/
 ├── Makefile                # Automatiza terraform + ansible
 ├── ansible.cfg             # Configuración general de Ansible
 └── README.md               # Documentación del proyecto (este archivo)
-
+```
 
 ---
 
