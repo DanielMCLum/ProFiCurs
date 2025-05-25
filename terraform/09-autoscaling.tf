@@ -7,6 +7,11 @@ resource "aws_launch_template" "wordpress" {
   instance_type = var.instance_type                  # Tipo de instancia EC2
   key_name      = aws_key_pair.deployer.key_name     # Clave SSH para conexión
 
+  user_data = base64encode(templatefile("${path.module}/userdata.sh.tpl", {
+    efs_id     = aws_efs_file_system.wordpress.id
+    aws_region = var.aws_region
+  }))
+
   network_interfaces {
     associate_public_ip_address = true               # Obtener IP pública automáticamente
     security_groups             = [aws_security_group.wordpress_sg.id]  # Grupo de seguridad
