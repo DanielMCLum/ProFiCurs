@@ -6,7 +6,7 @@ GROUP_VARS_FILE=$(ANSIBLE_DIR)/group_vars/all.yml
 .PHONY: all init apply destroy ansible inventory output plan validate deploy help
 
 # Ejecuta todo el flujo: init, apply, inventario, ansible
-all: init apply inventory ansible
+all: init apply inventory ansible output
 
 # Inicializa Terraform
 init:
@@ -45,6 +45,7 @@ deploy:
 	$(MAKE) apply
 	$(MAKE) inventory
 	$(MAKE) ansible
+	$(MAKE) output
 
 # Muestra las salidas definidas en outputs.tf
 output:
