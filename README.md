@@ -19,13 +19,18 @@ Este proyecto despliega una infraestructura completa y escalable para WordPress 
 
 ## 📁 Estructura del proyecto
 
+```plaintext
 proyecto/
-├── terraform/ # Código de infraestructura (VPC, EC2, ALB, EFS, RDS, ASG)
-├── ansible/ # Roles de configuración (nginx, php, mysql, wordpress)
-├── generate_inventory.sh # Script que actualiza variables desde Terraform
-├── Makefile # Ejecuta tareas como init, apply, ansible, etc.
-├── ansible.cfg # Configuración global de Ansible
-└── README.md # Este archivo
+├── terraform/              # Código de infraestructura (VPC, EC2, ALB, EFS, RDS, ASG)
+├── ansible/                # Roles de configuración (nginx, php, mysql, wordpress)
+│   ├── group_vars/         # Variables globales de Ansible
+│   ├── roles/              # Roles Ansible separados por componente
+│   └── aws_ec2.yaml        # Inventario dinámico basado en etiquetas EC2
+├── generate_inventory.sh   # Script que actualiza variables desde Terraform
+├── Makefile                # Automatiza terraform + ansible
+├── ansible.cfg             # Configuración general de Ansible
+└── README.md               # Documentación del proyecto (este archivo)
+
 
 ---
 
@@ -72,6 +77,8 @@ make all
 Cuando finalice, abre el navegador en:
 https://www.dominio.com (definido en group_vars/all.yml)
 
+```
+
 ---
 
 ## 📉 Escalabilidad automática
@@ -83,7 +90,8 @@ Se incluyen alarmas y políticas:
 
 * Persistencia de archivos gracias a EFS
 
-* Todo configurado por Terraform y verificado con CloudWatch
+Todo configurado por Terraform y verificado con CloudWatch
+
 ---
 
 ## 📬 Alertas por email
