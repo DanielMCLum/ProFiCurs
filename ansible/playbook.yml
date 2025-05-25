@@ -17,5 +17,5 @@
   roles:
     - nginx       # Configura Nginx como servidor web
     - php         # Instala PHP y módulos necesarios
-    - mysql       # Instala y configura MySQL para WordPress
+#    - mysql       # Instala y configura MySQL para WordPress (No necesario debido al uso de Amazon RDS)
     - wordpress   # Instala WordPress y lo integra con EFS y MySQL
