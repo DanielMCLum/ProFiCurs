@@ -105,18 +105,18 @@ Todo configurable en `10-monitoring.tf`
 
 
 
-## Estado actual
-* Infraestructura reproducible
+## ✔ Estado actual
+* ▶ Infraestructura reproducible
 
-* Instalación automática de WordPress
+* ▶ Instalación automática de WordPress
 
-* Auto scaling funcional
+* ▶ Auto scaling funcional
 
-* Persistencia de datos activa
+* ▶ Persistencia de datos activa
 
-* Monitoreo y alertas por email
+* ▶ Monitoreo y alertas por email
 
-* Documentación paso a paso
+* ▶ Documentación paso a paso
 
 
 
@@ -140,7 +140,11 @@ Esto ayuda a preservar la originalidad de los proyectos académicos y a fomentar
 El contenido de este repositorio está protegido por derechos de autor.  
 Cualquier uso no autorizado para comercialización será considerado una infracción.
  
-**Curso**: Proyecto Final ASIX · 2025 · INS PROVENÇANA
 
-Copyright (c) 2025 
+
+---
+Proyecto Final ASIX · 2025 · INS PROVENÇANA
+Todos los derechos reservados.  
+
+**Copyright © 2025**
 
