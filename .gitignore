@@ -3,7 +3,8 @@ terraform/.terraform/
 terraform/*.tfstate
 terraform/*.tfstate.*
 terraform/.terraform.lock.hcl
-terraform/terraform.tfvars
+terraform/terraform.tfvars       # archivo con datos sensibles
+#terraform/*.auto.tfvars          # incluye rds_endpoint o contraseñas sincronizadas
 
 # Ansible
 ansible/inventory.ini
