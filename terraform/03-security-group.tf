@@ -27,6 +27,13 @@ resource "aws_security_group" "wordpress_sg" {
     cidr_blocks = ["0.0.0.0/0"]                           # Permite navegación segura (HTTPS)
   }
 
+  ingress {
+  from_port   = 3306                                      # Puerto MySQL
+  to_port     = 3306
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Regla de salida (egress): permite cualquier tráfico saliente
   egress {
     from_port   = 0
