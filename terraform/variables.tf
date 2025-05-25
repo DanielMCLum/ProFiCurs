@@ -19,3 +19,8 @@ variable "acm_certificate_arn" {
   description = "ARN del certificado SSL de ACM para el ALB"
   type        = string
 }
+
+variable "wp_db_name" {}
+variable "wp_db_user" {}
+variable "wp_db_password" {}
+
