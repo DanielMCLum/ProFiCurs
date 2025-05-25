@@ -3,7 +3,7 @@
 define( 'DB_NAME', '{{ wp_db_name }}' );         // Nombre de la base de datos
 define( 'DB_USER', '{{ wp_db_user }}' );         // Usuario de la base de datos
 define( 'DB_PASSWORD', '{{ wp_db_password }}' ); // Contraseña del usuario
-define( 'DB_HOST', 'localhost' );                // Host de la base de datos (local en este caso)
+define( 'DB_HOST', '{{ wp_db_host }}' );         // Host de la base de datos (de group_vars)
 define( 'DB_CHARSET', 'utf8' );                  // Codificación de caracteres
 define( 'DB_COLLATE', '' );                      // Intercalación de la base de datos (vacío por defecto)
 
