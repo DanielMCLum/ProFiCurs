@@ -7,11 +7,13 @@ resource "aws_launch_template" "wordpress" {
   instance_type = var.instance_type                  # Tipo de instancia EC2
   key_name      = aws_key_pair.deployer.key_name     # Clave SSH para conexión
 
+  # Script de inicialización: monta EFS automáticamente
   user_data = base64encode(templatefile("${path.module}/userdata.sh.tpl", {
     efs_id     = aws_efs_file_system.wordpress.id
     aws_region = var.aws_region
   }))
-
+  
+  # Configuración de red
   network_interfaces {
     associate_public_ip_address = true               # Obtener IP pública automáticamente
     security_groups             = [aws_security_group.wordpress_sg.id]  # Grupo de seguridad
@@ -36,7 +38,13 @@ resource "aws_autoscaling_group" "wordpress_asg" {
   desired_capacity     = 2                           # Número inicial de instancias
   max_size             = 4                           # Máximo de instancias permitidas
   min_size             = 2                           # Mínimo de instancias funcionando
-  vpc_zone_identifier  = data.aws_subnets.default.ids # Subredes donde puede lanzar instancias
+  
+  # Subredes personalizadas (de nuestra VPC propia)
+  vpc_zone_identifier = [
+    aws_subnet.public_a.id,
+    aws_subnet.public_b.id
+  ]
+  
   health_check_type    = "ELB"                        # Tipo de chequeo (con ALB). Esto le dice al ASG que use los chequeos del balanceador de carga
   target_group_arns    = [aws_lb_target_group.wordpress_tg.arn]  # Grupo del ALB
 
@@ -70,7 +78,7 @@ resource "aws_autoscaling_policy" "scale_out" {
 
 # ALARMA CLOUDWATCH PARA ESCALAR HACIA ARRIBA (CPU > 80%)
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
-  alarm_name          = "cpu-high"
+  alarm_name          = "ASG-CPU-ALTO"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
@@ -78,7 +86,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   period              = 120
   statistic           = "Average"
   threshold           = 90                           # Si supera el 85%
-  alarm_description   = "Uso de CPU elevado - Escalando"
+  alarm_description   = "Uso de CPU elevado - Escalando instancias"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
   }
@@ -101,7 +109,7 @@ resource "aws_autoscaling_policy" "scale_in" {
 
 # ALARMA CLOUDWATCH PARA ESCALAR HACIA ABAJO (CPU < 50%)
 resource "aws_cloudwatch_metric_alarm" "cpu_low" {
-  alarm_name          = "cpu-low"
+  alarm_name          = "ASG-CPU-BAJO"
   comparison_operator = "LessThanThreshold"
   evaluation_periods  = 2
   metric_name         = "CPUUtilization"
