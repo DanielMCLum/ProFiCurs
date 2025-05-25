@@ -5,6 +5,8 @@ aws_region: us-east-1
 wp_db_name: wordpress
 wp_db_user: wpuser
 wp_db_password: wpsecurepass
+wp_db_host: wordpress-db.cxgecyeo6ykd.us-east-1.rds.amazonaws.com
+
 
 # PHP
 php_version: "8.1"
@@ -14,4 +16,4 @@ domain_name: www.caleit.cat
 ssl_email: contacto@caleit.cat
 
 # EFS
-efs_id: fs-02cdb4608ca83931b
+efs_id: fs-05254775a14cff4f4
