@@ -123,7 +123,7 @@ Todo configurable en `10-monitoring.tf`
 
 ## Licencia y condiciones de uso
 
-Este proyecto ha sido desarrollado como parte del módulo de Proyecto Final del ciclo formativo de grado superior en **Administración de Sistemas Informáticos en Red (ASIR)**.
+Este proyecto ha sido desarrollado como parte del módulo de Proyecto Final del ciclo formativo de grado superior en **Administración de Sistemas Informáticos en Red (ASIR)** en INS Provençana.
 
 ### Uso permitido
 Puedes consultar libremente el código, estructura y configuraciones de este repositorio con fines **educativos o de aprendizaje personal**.
