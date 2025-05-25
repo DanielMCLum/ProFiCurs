@@ -51,8 +51,8 @@ proyecto/
 ## 🛠️ Requisitos
 
 - Cuenta de AWS (con permisos para EC2, VPC, RDS, ALB, CloudWatch, SNS...)
-- `terraform >= 1.3`
-- `ansible >= 2.12`
+- Instalación `terraform >= 1.3`
+- Instalación `ansible >= 2.12`
 - Acceso SSH para conectarse a las instancias (clave generada automáticamente)
 - Python y entorno virtual para Ansible + boto3
 
