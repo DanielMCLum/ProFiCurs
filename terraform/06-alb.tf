@@ -3,7 +3,7 @@ resource "aws_lb_target_group" "wordpress_tg" {
   name         = "wordpress-tg"
   port         = 80                         # Puerto que escucha el target group
   protocol     = "HTTP"                     # Protocolo del tráfico dirigido a las instancias
-  vpc_id       = data.aws_vpc.default.id    # VPC en la que vive el grupo
+  vpc_id       = aws_vpc.main.id            # VPC en la que vive el grupo
   target_type  = "instance"                 # Se enruta tráfico a instancias EC2
 
   # Configuración de chequeo de salud
@@ -24,7 +24,11 @@ resource "aws_lb" "wordpress_alb" {
   internal           = false                               # "false" = accesible desde internet
   load_balancer_type = "application"                       # Tipo: ALB (no NLB)
   security_groups    = [aws_security_group.wordpress_sg.id]
-  subnets            = data.aws_subnets.default.ids
+
+  subnets = [
+    aws_subnet.public_a.id,
+    aws_subnet.public_b.id
+  ]
 
   enable_deletion_protection = false                       # Protege contra eliminación accidental
 }
