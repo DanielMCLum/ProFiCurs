@@ -63,6 +63,7 @@ proyecto/
 ```bash
 # Clona el repositorio y entra
 git clone https://github.com/DanielMCLum/ProFiCurs.git
+mkdir proyecto-wodpress-aws
 cd proyecto-wordpress-aws
 
 # Crea el entorno virtual
