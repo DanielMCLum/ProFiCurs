@@ -1,4 +1,5 @@
-/* # Comentado la creación de instancias porque ya lo hace el ASG (AutoScalingGroup)
+/* 
+# Comentado la creación de instancias porque ya lo hace el ASG (AutoScalingGroup)
 
 # Crea x instancias EC2 para alojar WordPress
 resource "aws_instance" "wordpress" {
@@ -13,3 +14,4 @@ resource "aws_instance" "wordpress" {
     Name = "wordpress-${count.index}"                                   # Etiqueta con nombre único por instancia
   }
 }
+*/

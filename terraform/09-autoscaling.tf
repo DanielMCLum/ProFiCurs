@@ -72,7 +72,7 @@ resource "aws_autoscaling_policy" "scale_out" {
   policy_type            = "SimpleScaling"
   scaling_adjustment     = 1                         # Aumentar 1 instancia
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 1200                       # Tiempo de espera antes de aplicar otro cambio
+  cooldown               = 60                       # Tiempo de espera antes de aplicar otro cambio
   autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name
 }
 
@@ -80,12 +80,12 @@ resource "aws_autoscaling_policy" "scale_out" {
 resource "aws_cloudwatch_metric_alarm" "cpu_high" {
   alarm_name          = "ASG-CPU-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 30
   statistic           = "Average"
-  threshold           = 90                           # Si supera el 85%
+  threshold           = 80                           # Si supera el 80%
   alarm_description   = "Uso de CPU elevado - Escalando instancias"
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.wordpress_asg.name
@@ -103,7 +103,7 @@ resource "aws_autoscaling_policy" "scale_in" {
   policy_type            = "SimpleScaling"
   scaling_adjustment     = -1                        # Reducir 1 instancia
   adjustment_type        = "ChangeInCapacity"
-  cooldown               = 300
+  cooldown               = 60
   autoscaling_group_name = aws_autoscaling_group.wordpress_asg.name
 }
 
@@ -111,10 +111,10 @@ resource "aws_autoscaling_policy" "scale_in" {
 resource "aws_cloudwatch_metric_alarm" "cpu_low" {
   alarm_name          = "ASG-CPU-BAJO"
   comparison_operator = "LessThanThreshold"
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 30
   statistic           = "Average"
   threshold           = 20                           # Si baja del 20%
   alarm_description   = "Uso del CPU bajo - Disminuyendo instancias"

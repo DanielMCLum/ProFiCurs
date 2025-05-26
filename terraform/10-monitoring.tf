@@ -19,12 +19,12 @@ resource "aws_sns_topic_subscription" "email_subscription" {
 resource "aws_cloudwatch_metric_alarm" "asg_cpu_high" {
   alarm_name          = "NOTIFICACION-CPU-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   metric_name         = "CPUUtilization"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 30
   statistic           = "Average"
-  threshold           = 80 # Umbral
+  threshold           = 70 # Umbral
   alarm_description   = "CPU media del Auto Scaling Group > 80% durante 6 minutos"
   
   dimensions = {
@@ -41,10 +41,10 @@ resource "aws_cloudwatch_metric_alarm" "asg_cpu_high" {
 resource "aws_cloudwatch_metric_alarm" "asg_network_in_high" {
   alarm_name          = "NOTIFICACION-RED-ENTRANTE-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   metric_name         = "NetworkIn"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 30
   statistic           = "Average"
   threshold           = 10000000 # Umbral de 10 MB cada 2 minutos
   unit                = "Bytes"
@@ -64,10 +64,10 @@ resource "aws_cloudwatch_metric_alarm" "asg_network_in_high" {
 resource "aws_cloudwatch_metric_alarm" "asg_network_out_high" {
   alarm_name          = "NOTIFICACION-RED-SALIENTE-ALTO"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 2
+  evaluation_periods  = 1
   metric_name         = "NetworkOut"
   namespace           = "AWS/EC2"
-  period              = 120
+  period              = 30
   statistic           = "Average"
   threshold           = 10000000 # 10 MB por periodo
   unit                = "Bytes"
