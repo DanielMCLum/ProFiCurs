@@ -26,6 +26,10 @@ resource "aws_db_instance" "wordpress" {
   allocated_storage = 20                    # Almacenamiento inicial en GB
   storage_type      = "gp2"                 # Tipo de almacenamiento (general purpose SSD)
 
+  # Política de backup (Habilitar en producción)
+  # backup_retention_period = 7               # Guarda los backups de los últimos 7 días
+  # preferred_backup_window = "03:00-06:00"   # Horario de baja actividad
+
   # Datos de acceso y nombre de la BBDD
   db_name           = var.wp_db_name
   username          = var.wp_db_user
